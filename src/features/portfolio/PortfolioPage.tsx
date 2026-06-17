@@ -54,12 +54,26 @@ export function PortfolioPage() {
         title="Portfolio"
         description="Idées, extensions, liens et socles — la carte de ton écosystème de projets."
         action={
-          isAvailable && ideas.length >= 2 ? (
-            <Button type="button" disabled={loading} onClick={() => void scan()}>
-              <Sparkles className="h-4 w-4" />
-              {loading ? 'Analyse…' : 'Scanner avec Steven'}
-            </Button>
-          ) : null
+          <div className="flex flex-wrap items-center gap-2">
+            <Link to="/app/ideas">
+              <Button type="button" variant="ghost">
+                Board idées
+              </Button>
+            </Link>
+            {ideas.length >= 2 && synergyLinks.length > 0 ? (
+              <Link to="/app/synergy">
+                <Button type="button" variant="ghost">
+                  Synergies
+                </Button>
+              </Link>
+            ) : null}
+            {isAvailable && ideas.length >= 2 ? (
+              <Button type="button" disabled={loading} onClick={() => void scan()}>
+                <Sparkles className="h-4 w-4" />
+                {loading ? 'Analyse…' : 'Scanner avec Steven'}
+              </Button>
+            ) : null}
+          </div>
         }
       />
 

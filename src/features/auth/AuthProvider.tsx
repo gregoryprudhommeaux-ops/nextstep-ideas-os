@@ -34,7 +34,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       const uid = user?.uid ?? null
       const prevUid = lastUidRef.current
-      if (prevUid !== uid) {
+      // Only reset on logout or account switch — not on first session attach (null → uid)
+      if (prevUid !== null && prevUid !== uid) {
         useAppStore.getState().resetWorkspace()
       }
       lastUidRef.current = uid

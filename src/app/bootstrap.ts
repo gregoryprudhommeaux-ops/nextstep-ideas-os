@@ -23,23 +23,36 @@ function isDataOwnedByUser(data: AppData, userId: string): boolean {
 }
 
 export async function bootstrapAppData(userId: string) {
-  let local = loadPersistedData(userId)
-  if (local && !isDataOwnedByUser(local, userId)) {
-    local = null
-  }
+  let chosen: AppData | null
 
-  const localSavedAt = getLocalSavedAt(userId)
-  let chosen = local
-
-  if (isFirebaseConfigured()) {
-    const remote = await loadWorkspaceFromFirestore(userId)
-    chosen = pickWorkspaceSource(local, localSavedAt, remote)
-
-    if (chosen && !remote) {
-      await saveWorkspaceToFirestore(userId, chosen)
+  try {
+    let local = loadPersistedData(userId)
+    if (local && !isDataOwnedByUser(local, userId)) {
+      local = null
     }
+
+    const localSavedAt = getLocalSavedAt(userId)
+    chosen = local
+
+    if (isFirebaseConfigured()) {
+      const remote = await loadWorkspaceFromFirestore(userId)
+      chosen = pickWorkspaceSource(local, localSavedAt, remote)
+
+      if (chosen && !remote) {
+        // Non-blocking — never stall UI if rules/network fail
+        void saveWorkspaceToFirestore(userId, chosen).catch(() => {})
+      }
+    }
+  } catch {
+    chosen = null
   }
 
   const data = normalizeAppData(chosen ?? createEmptyAppData())
+  useAppStore.getState().hydrateData(data)
+}
+
+/** Last-resort if bootstrap hangs — unblocks the loading screen. */
+export function hydrateEmptyWorkspace() {
+  const data = normalizeAppData(createEmptyAppData())
   useAppStore.getState().hydrateData(data)
 }

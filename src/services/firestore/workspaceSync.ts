@@ -14,13 +14,30 @@ function workspaceRef(uid: string) {
   return doc(getFirebaseServices().db, 'users', uid, 'workspace', DOC_ID)
 }
 
+const FIRESTORE_TIMEOUT_MS = 8_000
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error('Firestore timeout')), ms)
+    promise
+      .then((v) => {
+        clearTimeout(timer)
+        resolve(v)
+      })
+      .catch((e) => {
+        clearTimeout(timer)
+        reject(e)
+      })
+  })
+}
+
 export async function loadWorkspaceFromFirestore(uid: string): Promise<{
   data: AppData
   savedAt: number
 } | null> {
   if (!isFirebaseConfigured()) return null
   try {
-    const snap = await getDoc(workspaceRef(uid))
+    const snap = await withTimeout(getDoc(workspaceRef(uid)), FIRESTORE_TIMEOUT_MS)
     if (!snap.exists()) return null
     const raw = snap.data() as Record<string, unknown>
     const data = deserializeWorkspace(raw)

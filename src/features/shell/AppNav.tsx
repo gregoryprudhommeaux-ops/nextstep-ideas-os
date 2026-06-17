@@ -1,12 +1,12 @@
-import { Link, NavLink, useLocation } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { cn } from '../../lib/cn'
-import { appNavItems, mobileBottomNavItems, type AppNavItem } from './appNavItems'
+import { getAppNavItems, mobileBottomNavItems, type AppNavItem } from './appNavItems'
 import { isNavItemActive } from './navActive'
 
 function navClassName(isActive: boolean, variant: 'header' | 'tab' | 'pill') {
   if (variant === 'header') {
     return cn(
-      'whitespace-nowrap rounded-[--radius-sharp] px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition',
+      'relative z-10 whitespace-nowrap rounded-[--radius-sharp] px-3 py-2 text-[11px] font-semibold uppercase tracking-wide transition',
       isActive
         ? 'bg-background/15 text-background'
         : 'text-background/55 hover:bg-background/10 hover:text-background/90'
@@ -26,35 +26,56 @@ function navClassName(isActive: boolean, variant: 'header' | 'tab' | 'pill') {
   )
 }
 
-export function DesktopNav() {
+type NavProps = {
+  onboardingComplete: boolean
+}
+
+export function DesktopNav({ onboardingComplete }: NavProps) {
+  const { pathname } = useLocation()
+  const items = getAppNavItems(onboardingComplete)
+
   return (
-    <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Main">
-      {appNavItems.map(({ to, end, label }) => (
-        <NavLink key={to} to={to} end={end} className={({ isActive }) => navClassName(isActive, 'header')}>
-          {label}
-        </NavLink>
-      ))}
+    <nav className="relative z-10 hidden min-w-0 flex-1 justify-center lg:flex" aria-label="Main">
+      <div className="flex items-center gap-1">
+        {items.map(({ to, end, label }) => {
+          const isActive = isNavItemActive(pathname, to, end)
+          return (
+            <Link key={to} to={to} className={navClassName(isActive, 'header')} aria-current={isActive ? 'page' : undefined}>
+              {label}
+            </Link>
+          )
+        })}
+      </div>
     </nav>
   )
 }
 
-export function MobileNavPills() {
+export function MobileNavPills({ onboardingComplete }: NavProps) {
+  const { pathname } = useLocation()
+  const items = getAppNavItems(onboardingComplete)
+
+  if (items.length <= 1) return null
+
   return (
     <nav
       className="flex gap-2 overflow-x-auto border-b border-alternate/50 bg-background px-4 py-3 lg:hidden [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       aria-label="Main"
     >
-      {appNavItems.map(({ to, end, label }) => (
-        <NavLink key={to} to={to} end={end} className={({ isActive }) => navClassName(isActive, 'pill')}>
-          {label}
-        </NavLink>
-      ))}
+      {items.map(({ to, end, label }) => {
+        const isActive = isNavItemActive(pathname, to, end)
+        return (
+          <Link key={to} to={to} className={navClassName(isActive, 'pill')} aria-current={isActive ? 'page' : undefined}>
+            {label}
+          </Link>
+        )
+      })}
     </nav>
   )
 }
 
-export function MobileBottomNav() {
+export function MobileBottomNav({ onboardingComplete }: NavProps) {
   const { pathname } = useLocation()
+  const items = onboardingComplete ? mobileBottomNavItems : mobileBottomNavItems.filter((i) => i.to === '/app/founder')
 
   return (
     <nav
@@ -62,7 +83,7 @@ export function MobileBottomNav() {
       aria-label="Main"
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-between">
-        {mobileBottomNavItems.map((item) => (
+        {items.map((item) => (
           <MobileBottomNavItem key={item.to} item={item} pathname={pathname} />
         ))}
       </div>

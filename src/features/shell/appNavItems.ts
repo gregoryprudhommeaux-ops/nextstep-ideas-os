@@ -1,14 +1,5 @@
 import type { LucideIcon } from 'lucide-react'
-import {
-  Brain,
-  Filter,
-  GitBranch,
-  LayoutGrid,
-  Lightbulb,
-  NotebookPen,
-  Settings,
-  User,
-} from 'lucide-react'
+import { Brain, LayoutGrid, NotebookPen, User } from 'lucide-react'
 
 export type AppNavItem = {
   to: string
@@ -17,17 +8,17 @@ export type AppNavItem = {
   end?: boolean
 }
 
-export const appNavItems: AppNavItem[] = [
+/** Core nav — 4 zones aligned with the product story. */
+const coreNavItems: AppNavItem[] = [
   { to: '/app/brainstorm', end: true, label: 'Brainstorm', icon: Brain },
   { to: '/app/portfolio', label: 'Portfolio', icon: LayoutGrid },
-  { to: '/app/ideas', label: 'Ideas', icon: Lightbulb },
-  { to: '/app/synergy', label: 'Synergy', icon: GitBranch },
-  { to: '/app/review', label: 'Review', icon: NotebookPen },
+  { to: '/app/review', label: 'Revue', icon: NotebookPen },
   { to: '/app/founder', label: 'Profil', icon: User },
-  { to: '/app/settings', label: 'Settings', icon: Settings },
-  { to: '/app/filters', label: 'Profiles', icon: Filter },
 ]
 
-export const mobileBottomNavItems = appNavItems.filter(
-  (i) => !['/app/synergy', '/app/filters', '/app/settings'].includes(i.to)
-)
+export function getAppNavItems(onboardingComplete: boolean): AppNavItem[] {
+  if (onboardingComplete) return coreNavItems
+  return coreNavItems.filter((item) => item.to === '/app/founder')
+}
+
+export const mobileBottomNavItems = coreNavItems

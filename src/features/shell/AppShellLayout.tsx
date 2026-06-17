@@ -9,6 +9,9 @@ import { LoadingScreen } from './LoadingScreen'
 
 export function AppShellLayout() {
   const hasData = useAppStore((s) => Boolean(s.data))
+  const onboardingComplete = useAppStore((s) =>
+    Boolean(s.data?.founderProfile?.onboardingCompletedAt)
+  )
   const resetWorkspace = useAppStore((s) => s.resetWorkspace)
 
   const handleSignOut = () => {
@@ -21,11 +24,11 @@ export function AppShellLayout() {
   return (
     <div className="flex min-h-dvh w-full flex-col bg-mineral">
       <header className="sticky top-0 z-30 w-full shrink-0 border-b border-alternate/40 bg-midnight text-background">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-3 px-4 sm:px-5">
+        <div className="mx-auto grid h-14 w-full max-w-6xl grid-cols-[auto_1fr_auto] items-center gap-3 px-4 sm:px-5">
           <Link
-            to="/"
-            className="flex min-w-0 items-center gap-2.5 rounded-[--radius-sharp] transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background/50 sm:gap-3"
-            aria-label="NextStep Idea OS — home"
+            to="/app/brainstorm"
+            className="flex min-w-0 shrink-0 items-center gap-2.5 rounded-[--radius-sharp] transition hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-background/50 sm:gap-3"
+            aria-label="NextStep Idea OS — brainstorm"
           >
             <div className="h-8 w-8 shrink-0 rounded-[--radius-sharp] bg-primary" />
             <div className="min-w-0 leading-tight">
@@ -36,9 +39,9 @@ export function AppShellLayout() {
             </div>
           </Link>
 
-          <DesktopNav />
+          <DesktopNav onboardingComplete={onboardingComplete} />
 
-          <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
+          <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-2">
             <div className="max-w-[8.5rem] sm:max-w-none">
               <ProfileSwitcher variant="header" />
             </div>
@@ -63,13 +66,13 @@ export function AppShellLayout() {
         </div>
       </header>
 
-      <MobileNavPills />
+      <MobileNavPills onboardingComplete={onboardingComplete} />
 
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 pb-24 sm:px-5 sm:py-8 lg:pb-8">
         <Outlet />
       </main>
 
-      <MobileBottomNav />
+      <MobileBottomNav onboardingComplete={onboardingComplete} />
     </div>
   )
 }

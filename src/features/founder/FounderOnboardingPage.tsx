@@ -74,7 +74,7 @@ export function FounderOnboardingPage() {
       <SectionHeader
         eyebrow={`Étape ${step + 1} sur ${STEPS.length}`}
         title="Ton profil fondateur"
-        description="Une seule session, en langage naturel. L’AI pourra structurer tout ça plus tard — pour l’instant, parle librement."
+        description="Une seule session, en langage naturel. Termine ces 3 blocs pour débloquer Brainstorm, Portfolio et la revue hebdo."
       />
 
       <div className="flex gap-2">
