@@ -3,9 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { SectionHeader } from '../../components/SectionHeader'
 import { Button } from '../../components/ui/Button'
 import { Field } from '../../components/ui/Field'
+import { Input } from '../../components/ui/Input'
 import { Textarea } from '../../components/ui/Textarea'
 import { useAppStore } from '../../app/store'
 import { useAuth } from '../auth/useAuth'
+import { isValidLinkedInUrl } from '../../lib/linkedin'
 import { FounderProfilePage } from './FounderProfilePage'
 
 const STEPS = [
@@ -42,6 +44,7 @@ export function FounderOnboardingPage() {
   const saveFounderProfile = useAppStore((s) => s.saveFounderProfile)
 
   const [step, setStep] = useState(0)
+  const [linkedinUrl, setLinkedinUrl] = useState('')
   const [whoIAmRaw, setWhoIAmRaw] = useState('')
   const [whatIWantRaw, setWhatIWantRaw] = useState('')
   const [howIWorkRaw, setHowIWorkRaw] = useState('')
@@ -53,7 +56,11 @@ export function FounderOnboardingPage() {
   const current = STEPS[step]
   const values = { whoIAm: whoIAmRaw, whatIWant: whatIWantRaw, howIWork: howIWorkRaw }
   const currentValue = values[current.key]
-  const canContinue = currentValue.trim().length >= 10
+  const linkedinOk = isValidLinkedInUrl(linkedinUrl)
+  const canContinue =
+    step === 0
+      ? whoIAmRaw.trim().length >= 10 && linkedinOk
+      : currentValue.trim().length >= 10
 
   function handleNext() {
     if (step < STEPS.length - 1) {
@@ -64,6 +71,7 @@ export function FounderOnboardingPage() {
       whoIAmRaw,
       whatIWantRaw,
       howIWorkRaw,
+      linkedinUrl,
       userId: user?.uid ?? 'local',
     })
     navigate('/app/brainstorm')
@@ -87,6 +95,26 @@ export function FounderOnboardingPage() {
           />
         ))}
       </div>
+
+      {step === 0 ? (
+        <Field
+          label="Profil LinkedIn"
+          hint="Lien public vers ton profil — Steven s’en sert pour contextualiser ton parcours."
+        >
+          <Input
+            type="url"
+            value={linkedinUrl}
+            onChange={(e) => setLinkedinUrl(e.target.value)}
+            placeholder="https://www.linkedin.com/in/ton-profil"
+            autoComplete="url"
+          />
+          {linkedinUrl.trim() && !linkedinOk ? (
+            <p className="mt-2 text-xs text-red-600/90">
+              URL LinkedIn invalide — utilise un lien du type linkedin.com/in/…
+            </p>
+          ) : null}
+        </Field>
+      ) : null}
 
       <Field label={current.title} hint={current.prompt}>
         <Textarea

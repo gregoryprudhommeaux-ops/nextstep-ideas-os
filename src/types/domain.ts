@@ -253,6 +253,7 @@ export type BrainstormPhase =
 export type FounderProfile = WithTimestamps & {
   id: string
   userId: string
+  linkedinUrl?: string
   whoIAmRaw: string
   whoIAm: {
     experienceSummary: string

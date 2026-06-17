@@ -23,6 +23,7 @@ export function buildFounderContext(profile: FounderProfile | null): string {
   if (!profile) return 'Profil fondateur non renseigné.'
 
   return `PROFIL FONDATEUR:
+${profile.linkedinUrl ? `LinkedIn: ${profile.linkedinUrl}` : ''}
 Qui je suis: ${profile.whoIAmRaw}
 Ce que je veux: ${profile.whatIWantRaw}
 Comment je fonctionne: ${profile.howIWorkRaw}`

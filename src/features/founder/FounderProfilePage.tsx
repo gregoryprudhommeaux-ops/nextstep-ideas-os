@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import { ExternalLink } from 'lucide-react'
 import { SectionHeader } from '../../components/SectionHeader'
 import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
+import { Field } from '../../components/ui/Field'
+import { Input } from '../../components/ui/Input'
 import { useAppStore } from '../../app/store'
 import { useAISettings } from '../ai/useAISettings'
 import { structureFounderProfile, type AIRouterContext } from '../ai/router'
 import { nowTimestamp } from '../../lib/time'
+import { isValidLinkedInUrl, normalizeLinkedInUrl } from '../../lib/linkedin'
 
 export function FounderProfilePage() {
   const profile = useAppStore((s) => s.data?.founderProfile)
@@ -16,8 +20,21 @@ export function FounderProfilePage() {
   const { settings, isAvailable } = useAISettings()
   const [structuring, setStructuring] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [linkedinDraft, setLinkedinDraft] = useState(profile?.linkedinUrl ?? '')
+  const [linkedinSaved, setLinkedinSaved] = useState(false)
 
   if (!profile) return null
+
+  const linkedinOk = !linkedinDraft.trim() || isValidLinkedInUrl(linkedinDraft)
+
+  function saveLinkedin() {
+    if (!linkedinOk) return
+    updateFounderProfile({
+      linkedinUrl: normalizeLinkedInUrl(linkedinDraft) || undefined,
+    })
+    setLinkedinSaved(true)
+    window.setTimeout(() => setLinkedinSaved(false), 2000)
+  }
 
   const blocks = [
     { title: 'Qui je suis', raw: profile.whoIAmRaw },
@@ -70,6 +87,36 @@ export function FounderProfilePage() {
       />
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+      <Card className="p-5">
+        <Field label="Profil LinkedIn" hint="Lien public vers ton profil professionnel.">
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input
+              type="url"
+              value={linkedinDraft}
+              onChange={(e) => setLinkedinDraft(e.target.value)}
+              placeholder="https://www.linkedin.com/in/…"
+            />
+            <Button type="button" variant="ghost" disabled={!linkedinOk} onClick={saveLinkedin}>
+              {linkedinSaved ? 'Enregistré ✓' : 'Mettre à jour'}
+            </Button>
+          </div>
+          {!linkedinOk ? (
+            <p className="mt-2 text-xs text-red-600/90">URL LinkedIn invalide</p>
+          ) : null}
+          {profile.linkedinUrl ? (
+            <a
+              href={profile.linkedinUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-midnight hover:underline"
+            >
+              Voir le profil
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          ) : null}
+        </Field>
+      </Card>
 
       <div className="space-y-4">
         {blocks.map((block) => (
