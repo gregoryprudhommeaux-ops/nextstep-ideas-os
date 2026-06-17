@@ -1,0 +1,25 @@
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-background);
+    color: var(--color-tertiary);
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--color-primary), white 60%);
+  }
+}
+
+@layer utilities {
+  .text-micro {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+}
+
