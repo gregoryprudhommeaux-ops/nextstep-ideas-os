@@ -16,9 +16,9 @@ export function AppShellLayout() {
   }, [hasData])
 
   return (
-    <div className="min-h-dvh bg-mineral">
-      <header className="sticky top-0 z-10 border-b border-alternate/40 bg-midnight text-background">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-5">
+    <div className="flex min-h-dvh w-full flex-col bg-mineral">
+      <header className="sticky top-0 z-10 w-full shrink-0 border-b border-alternate/40 bg-midnight text-background">
+        <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between gap-4 px-5">
           <div className="flex min-w-0 items-center gap-3">
             <div className="h-7 w-7 shrink-0 rounded-[--radius-sharp] bg-primary" />
             <div className="min-w-0 leading-tight">
@@ -93,7 +93,7 @@ export function AppShellLayout() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-5 py-8">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-5 py-8">
         <Outlet />
       </main>
     </div>

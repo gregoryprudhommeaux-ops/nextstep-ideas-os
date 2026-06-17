@@ -1,7 +1,8 @@
 import { Link, useParams } from 'react-router-dom'
 import type { ReactNode } from 'react'
+import { useMemo } from 'react'
 import { Card } from '../components/ui/Card'
-import { useActiveProfile, useAppStore, useIdeaScore } from '../app/store'
+import { useActiveProfile, useAppStore, useIdeaScore, EMPTY_DECISION_NOTES, EMPTY_IDEAS, EMPTY_SYNERGY_LINKS } from '../app/store'
 import { ScorePill } from '../components/score/ScorePill'
 import { TagBadge } from '../components/TagBadge'
 import { MetricRow } from '../components/MetricRow'
@@ -30,14 +31,20 @@ function MemoSection({ title, children }: { title: string; children: ReactNode }
 export function IdeaDetailPage() {
   const { ideaId } = useParams()
   const idea = useAppStore((s) => s.data?.ideas.find((i) => i.id === ideaId) ?? null)
-  const notes = useAppStore((s) => s.data?.decisionNotes.filter((n) => n.ideaId === ideaId) ?? [])
-  const synergyLinks = useAppStore((s) =>
-    ideaId ? getLinksForIdea(s.data?.synergyLinks ?? [], ideaId) : []
+  const decisionNotes = useAppStore((s) => s.data?.decisionNotes ?? EMPTY_DECISION_NOTES)
+  const notes = useMemo(
+    () => decisionNotes.filter((n) => n.ideaId === ideaId),
+    [decisionNotes, ideaId]
+  )
+  const synergyLinksSource = useAppStore((s) => s.data?.synergyLinks ?? EMPTY_SYNERGY_LINKS)
+  const synergyLinks = useMemo(
+    () => (ideaId ? getLinksForIdea(synergyLinksSource, ideaId) : EMPTY_SYNERGY_LINKS),
+    [synergyLinksSource, ideaId]
   )
   const umbrella = useAppStore((s) =>
     s.data?.umbrellaGroups.find((g) => g.ideaIds.includes(ideaId ?? '')) ?? null
   )
-  const allIdeas = useAppStore((s) => s.data?.ideas ?? [])
+  const allIdeas = useAppStore((s) => s.data?.ideas ?? EMPTY_IDEAS)
   const profile = useActiveProfile()
   const score = useIdeaScore(ideaId ?? '')
 

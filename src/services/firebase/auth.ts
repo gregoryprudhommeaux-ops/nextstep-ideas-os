@@ -1,8 +1,9 @@
 import {
   GoogleAuthProvider,
   browserLocalPersistence,
+  getRedirectResult,
   setPersistence,
-  signInWithPopup,
+  signInWithRedirect,
   signOut,
 } from 'firebase/auth'
 import { getFirebaseServices } from './firebase'
@@ -14,11 +15,15 @@ export async function initAuthPersistence() {
   await setPersistence(getFirebaseServices().auth, browserLocalPersistence)
 }
 
+/** Full-page redirect — works when Google blocks signInWithPopup (embedded browsers, COOP). */
 export async function signInWithGoogle() {
-  return await signInWithPopup(getFirebaseServices().auth, googleProvider)
+  await signInWithRedirect(getFirebaseServices().auth, googleProvider)
+}
+
+export async function completeGoogleRedirectSignIn() {
+  return await getRedirectResult(getFirebaseServices().auth)
 }
 
 export async function signOutUser() {
   return await signOut(getFirebaseServices().auth)
 }
-

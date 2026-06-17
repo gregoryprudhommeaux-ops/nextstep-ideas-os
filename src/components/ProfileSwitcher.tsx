@@ -1,11 +1,11 @@
 import * as React from 'react'
 import { ChevronDown } from 'lucide-react'
-import { useActiveProfile, useAppStore } from '../app/store'
+import { useActiveProfile, useAppStore, EMPTY_PROFILES } from '../app/store'
 import { cn } from '../lib/cn'
 
 export function ProfileSwitcher({ variant = 'header' }: { variant?: 'header' | 'inline' }) {
   const profile = useActiveProfile()
-  const profiles = useAppStore((s) => s.data?.profiles ?? [])
+  const profiles = useAppStore((s) => s.data?.profiles ?? EMPTY_PROFILES)
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId)
   const [open, setOpen] = React.useState(false)
   const ref = React.useRef<HTMLDivElement>(null)

@@ -1,5 +1,5 @@
 import { Card } from '../components/ui/Card'
-import { useActiveProfile, useAppStore } from '../app/store'
+import { useActiveProfile, useAppStore, EMPTY_FILTERS, EMPTY_IDEAS, EMPTY_PROFILES } from '../app/store'
 import { SectionHeader } from '../components/SectionHeader'
 import { ProfileSwitcher } from '../components/ProfileSwitcher'
 import { cn } from '../lib/cn'
@@ -13,9 +13,9 @@ import type { ScoreDimension } from '../types/domain'
 
 export function FiltersPage() {
   const profile = useActiveProfile()
-  const profiles = useAppStore((s) => s.data?.profiles ?? [])
-  const filters = useAppStore((s) => s.data?.filters ?? [])
-  const ideas = useAppStore((s) => s.data?.ideas ?? [])
+  const profiles = useAppStore((s) => s.data?.profiles ?? EMPTY_PROFILES)
+  const filters = useAppStore((s) => s.data?.filters ?? EMPTY_FILTERS)
+  const ideas = useAppStore((s) => s.data?.ideas ?? EMPTY_IDEAS)
   const activeProfileId = useAppStore((s) => s.activeProfileId)
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId)
 

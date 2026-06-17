@@ -1,7 +1,7 @@
 export function LoadingScreen() {
   return (
-    <div className="min-h-dvh bg-mineral">
-      <div className="mx-auto flex min-h-dvh max-w-6xl items-center justify-center px-5">
+    <div className="flex min-h-dvh w-full flex-col bg-mineral">
+      <div className="mx-auto flex min-h-dvh w-full max-w-6xl flex-1 items-center justify-center px-5">
         <div className="w-full max-w-md rounded-[--radius-card] border border-alternate/60 bg-background p-6 shadow-sm">
           <div className="flex items-center gap-3">
             <div className="h-7 w-7 rounded-[--radius-sharp] bg-primary" />

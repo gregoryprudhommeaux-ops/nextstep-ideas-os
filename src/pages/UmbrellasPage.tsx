@@ -1,8 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useMemo } from 'react'
 import { Card } from '../components/ui/Card'
 import { SectionHeader } from '../components/SectionHeader'
 import { ScorePill } from '../components/score/ScorePill'
-import { useAppStore, useIdeaScore } from '../app/store'
+import { useAppStore, useIdeaScore, EMPTY_IDEAS, EMPTY_UMBRELLA_GROUPS } from '../app/store'
 import { cn } from '../lib/cn'
 
 function GroupIdeaRow({ ideaId }: { ideaId: string }) {
@@ -21,13 +22,12 @@ function GroupIdeaRow({ ideaId }: { ideaId: string }) {
 }
 
 export function UmbrellasPage() {
-  const groups = useAppStore((s) => s.data?.umbrellaGroups ?? [])
-  const ungrouped = useAppStore((s) => {
-    const ideas = s.data?.ideas ?? []
-    const grps = s.data?.umbrellaGroups ?? []
-    const grouped = new Set(grps.flatMap((g) => g.ideaIds))
+  const groups = useAppStore((s) => s.data?.umbrellaGroups ?? EMPTY_UMBRELLA_GROUPS)
+  const ideas = useAppStore((s) => s.data?.ideas ?? EMPTY_IDEAS)
+  const ungrouped = useMemo(() => {
+    const grouped = new Set(groups.flatMap((g) => g.ideaIds))
     return ideas.filter((i) => !grouped.has(i.id))
-  })
+  }, [groups, ideas])
 
   return (
     <div className="space-y-8">

@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { SectionHeader } from '../components/SectionHeader'
-import { useAppStore } from '../app/store'
+import { useAppStore, EMPTY_IDEAS, EMPTY_WEEKLY_REVIEWS } from '../app/store'
 
 function IdeaChipList({ ids, label }: { ids?: string[]; label: string }) {
-  const ideas = useAppStore((s) => s.data?.ideas ?? [])
+  const ideas = useAppStore((s) => s.data?.ideas ?? EMPTY_IDEAS)
   const list = (ids ?? []).map((id) => ideas.find((i) => i.id === id)).filter(Boolean)
 
   return (
@@ -30,7 +30,7 @@ function IdeaChipList({ ids, label }: { ids?: string[]; label: string }) {
 }
 
 export function WeeklyReviewPage() {
-  const reviews = useAppStore((s) => s.data?.weeklyReviews ?? [])
+  const reviews = useAppStore((s) => s.data?.weeklyReviews ?? EMPTY_WEEKLY_REVIEWS)
   const sorted = [...reviews].sort((a, b) => b.weekLabel.localeCompare(a.weekLabel))
   const latest = sorted[0]
 

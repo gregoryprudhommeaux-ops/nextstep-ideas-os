@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { SectionHeader } from '../components/SectionHeader'
 import { SynergyStrengthBadge } from '../components/SynergyStrengthBadge'
-import { useAppStore } from '../app/store'
+import { useAppStore, EMPTY_IDEAS, EMPTY_SYNERGY_LINKS } from '../app/store'
 import {
   filterLinksByStrength,
   getMostConnectedIdeas,
@@ -13,8 +13,8 @@ import type { SynergyStrength } from '../types/domain'
 import { cn } from '../lib/cn'
 
 export function SynergyPage() {
-  const ideas = useAppStore((s) => s.data?.ideas ?? [])
-  const links = useAppStore((s) => s.data?.synergyLinks ?? [])
+  const ideas = useAppStore((s) => s.data?.ideas ?? EMPTY_IDEAS)
+  const links = useAppStore((s) => s.data?.synergyLinks ?? EMPTY_SYNERGY_LINKS)
   const [strengthFilter, setStrengthFilter] = React.useState<SynergyStrength | 'all'>('all')
 
   const ideaTitle = (id: string) => ideas.find((i) => i.id === id)?.title ?? id

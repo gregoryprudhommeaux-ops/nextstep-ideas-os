@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
-import { useActiveProfile, useAppStore, useRankedIdeas } from '../app/store'
+import { useActiveProfile, useAppStore, useRankedIdeas, EMPTY_IDEAS, EMPTY_SYNERGY_LINKS, EMPTY_WEEKLY_REVIEWS } from '../app/store'
 import { SectionHeader } from '../components/SectionHeader'
 import { StatCard } from '../components/StatCard'
 import { IdeaLinkRow } from '../components/IdeaLinkRow'
@@ -20,10 +20,10 @@ function needsAttention(idea: Idea, profile: NonNullable<ReturnType<typeof useAc
 export function DashboardPage() {
   const profile = useActiveProfile()
   const ranked = useRankedIdeas()
-  const ideas = useAppStore((s) => s.data?.ideas ?? [])
-  const synergyLinks = useAppStore((s) => s.data?.synergyLinks ?? [])
+  const ideas = useAppStore((s) => s.data?.ideas ?? EMPTY_IDEAS)
+  const synergyLinks = useAppStore((s) => s.data?.synergyLinks ?? EMPTY_SYNERGY_LINKS)
   const latestReview = useAppStore((s) => {
-    const reviews = s.data?.weeklyReviews ?? []
+    const reviews = s.data?.weeklyReviews ?? EMPTY_WEEKLY_REVIEWS
     return [...reviews].sort((a, b) => b.weekLabel.localeCompare(a.weekLabel))[0] ?? null
   })
 

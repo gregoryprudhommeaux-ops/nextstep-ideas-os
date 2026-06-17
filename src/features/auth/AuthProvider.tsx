@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
-import { initAuthPersistence } from '../../services/firebase/auth'
+import { completeGoogleRedirectSignIn, initAuthPersistence } from '../../services/firebase/auth'
 import { isFirebaseConfigured } from '../../config/env'
 import { getFirebaseServices } from '../../services/firebase/firebase'
 import { allowedEmails } from './allowedEmails'
@@ -23,26 +23,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     if (!isFirebaseConfigured()) return
 
-    let isMounted = true
-    let unsubscribe: (() => void) | null = null
-
     const auth = getFirebaseServices().auth
 
-    void initAuthPersistence()
-      .catch(() => {})
-      .finally(() => {
-        unsubscribe = onAuthStateChanged(auth, (user) => {
-          if (!isMounted) return
-          const email = (user?.email ?? '').toLowerCase() || null
-          const isAuthorized = email ? allowedEmails.has(email) : false
-          setState({ user, isLoading: false, isAuthorized, email, configError: undefined })
-        })
-      })
+    // Do not block auth listener on persistence — setPersistence can hang in some browsers.
+    void initAuthPersistence().catch(() => {})
+    void completeGoogleRedirectSignIn().catch(() => {})
 
-    return () => {
-      isMounted = false
-      unsubscribe?.()
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const email = (user?.email ?? '').toLowerCase() || null
+      const isAuthorized = email ? allowedEmails.has(email) : false
+      setState({ user, isLoading: false, isAuthorized, email, configError: undefined })
+    })
+
+    return () => unsubscribe()
   }, [])
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>
