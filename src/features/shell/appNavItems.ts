@@ -4,21 +4,40 @@ import { Brain, LayoutGrid, NotebookPen, User } from 'lucide-react'
 export type AppNavItem = {
   to: string
   label: string
+  description: string
   icon: LucideIcon
   end?: boolean
+  /** Locked until founder onboarding is complete */
+  requiresOnboarding?: boolean
 }
 
-/** Core nav — 4 zones aligned with the product story. */
-const coreNavItems: AppNavItem[] = [
-  { to: '/app/brainstorm', end: true, label: 'Brainstorm', icon: Brain },
-  { to: '/app/portfolio', label: 'Portfolio', icon: LayoutGrid },
-  { to: '/app/review', label: 'Revue', icon: NotebookPen },
-  { to: '/app/founder', label: 'Profil', icon: User },
+export const appNavItems: AppNavItem[] = [
+  {
+    to: '/app/brainstorm',
+    end: true,
+    label: 'Brainstorm',
+    description: 'Flux du moment',
+    icon: Brain,
+    requiresOnboarding: true,
+  },
+  {
+    to: '/app/portfolio',
+    label: 'Portfolio',
+    description: 'Vue système',
+    icon: LayoutGrid,
+    requiresOnboarding: true,
+  },
+  {
+    to: '/app/review',
+    label: 'Revue',
+    description: 'Revue hebdo',
+    icon: NotebookPen,
+    requiresOnboarding: true,
+  },
+  {
+    to: '/app/founder',
+    label: 'Profil',
+    description: 'Profil fondateur',
+    icon: User,
+  },
 ]
-
-export function getAppNavItems(onboardingComplete: boolean): AppNavItem[] {
-  if (onboardingComplete) return coreNavItems
-  return coreNavItems.filter((item) => item.to === '/app/founder')
-}
-
-export const mobileBottomNavItems = coreNavItems
