@@ -1,7 +1,6 @@
 import { Card } from '../components/ui/Card'
 import { useActiveProfile, useAppStore, EMPTY_FILTERS, EMPTY_IDEAS, EMPTY_PROFILES } from '../app/store'
 import { SectionHeader } from '../components/SectionHeader'
-import { ProfileSwitcher } from '../components/ProfileSwitcher'
 import { cn } from '../lib/cn'
 import { dimensionMeta, penaltyDimensions, positiveDimensions } from '../features/scoring/dimensions'
 import {
@@ -20,22 +19,23 @@ export function FiltersPage() {
   const setActiveProfileId = useAppStore((s) => s.setActiveProfileId)
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <SectionHeader
         eyebrow="Scoring system"
         title="Filters & Profiles"
         description="Switch strategic lenses to change how ideas rank. Weights are transparent — no black box."
-        action={<ProfileSwitcher variant="inline" />}
       />
 
       {profile ? (
-        <Card className="border-primary/25 bg-primary/5 p-6">
+        <Card className="border-primary/30 bg-primary/5 p-5 sm:p-6">
           <div className="text-micro text-tertiary/60">Active lens</div>
-          <div className="mt-1 text-xl font-black tracking-tight text-midnight">{profile.name}</div>
-          <p className="mt-3 max-w-prose text-sm leading-relaxed text-tertiary/75">
+          <div className="mt-1 text-xl font-black tracking-tight text-midnight sm:text-2xl">
+            {profile.name}
+          </div>
+          <p className="mt-3 max-w-prose text-sm leading-relaxed text-tertiary/80 sm:text-[15px]">
             {getProfileExplanation(profile)}
           </p>
-          <div className="mt-4 text-xs text-tertiary/65">
+          <div className="mt-4 text-xs leading-relaxed text-tertiary/65">
             Favors:{' '}
             {getProfileFavoredDimensions(profile)
               .map((d) => dimensionMeta[d as ScoreDimension]?.label ?? d)
@@ -88,20 +88,24 @@ export function FiltersPage() {
             Structure for future custom filters. Step 2.5 displays seed definitions only.
           </p>
           <div className="mt-4 space-y-3">
-            {filters.map((f) => (
-              <div
-                key={f.id}
-                className="rounded-[--radius-card] border border-alternate/60 bg-background px-4 py-3"
-              >
-                <div className="flex items-baseline justify-between gap-4">
-                  <div className="text-sm font-semibold text-midnight">{f.name}</div>
-                  <div className="text-micro text-tertiary/60">{f.type}</div>
+            {filters.length ? (
+              filters.map((f) => (
+                <div
+                  key={f.id}
+                  className="rounded-[--radius-card] border border-alternate/50 bg-background px-4 py-3"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <div className="text-sm font-semibold text-midnight">{f.name}</div>
+                    <div className="text-micro text-tertiary/60">{f.type}</div>
+                  </div>
+                  {f.description ? (
+                    <div className="mt-2 text-xs leading-relaxed text-tertiary/70">{f.description}</div>
+                  ) : null}
                 </div>
-                {f.description ? (
-                  <div className="mt-2 text-xs leading-relaxed text-tertiary/70">{f.description}</div>
-                ) : null}
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-sm text-tertiary/60">No custom filters yet — scoring profiles drive ranking.</p>
+            )}
           </div>
         </Card>
       </div>

@@ -1,17 +1,45 @@
-import { mockRepository } from '../services/repositories/MockRepository'
-import { useAppStore } from './store'
+import { loadPersistedData, getLocalSavedAt } from './persistence'
+import { createEmptyAppData } from '../data/systemDefaults'
+import { normalizeStevenConfig } from '../features/steven/normalizeStevenConfig'
+import { useAppStore, type AppData } from './store'
+import {
+  loadWorkspaceFromFirestore,
+  pickWorkspaceSource,
+  saveWorkspaceToFirestore,
+} from '../services/firestore/workspaceSync'
+import { isFirebaseConfigured } from '../config/env'
 
-export async function bootstrapMockData() {
-  const snap = await mockRepository.getSeedSnapshot()
-  useAppStore.getState().setData({
-    ideas: snap.ideas,
-    filters: snap.filters,
-    profiles: snap.profiles,
-    tags: snap.tags,
-    decisionNotes: snap.decisionNotes,
-    synergyLinks: snap.synergyLinks,
-    umbrellaGroups: snap.umbrellaGroups,
-    weeklyReviews: snap.weeklyReviews,
-  })
+function normalizeAppData(data: ReturnType<typeof createEmptyAppData>) {
+  return {
+    ...data,
+    steven: normalizeStevenConfig(data.steven),
+  }
 }
 
+function isDataOwnedByUser(data: AppData, userId: string): boolean {
+  const owner = data.founderProfile?.userId
+  if (!owner) return true
+  return owner === userId
+}
+
+export async function bootstrapAppData(userId: string) {
+  let local = loadPersistedData(userId)
+  if (local && !isDataOwnedByUser(local, userId)) {
+    local = null
+  }
+
+  const localSavedAt = getLocalSavedAt(userId)
+  let chosen = local
+
+  if (isFirebaseConfigured()) {
+    const remote = await loadWorkspaceFromFirestore(userId)
+    chosen = pickWorkspaceSource(local, localSavedAt, remote)
+
+    if (chosen && !remote) {
+      await saveWorkspaceToFirestore(userId, chosen)
+    }
+  }
+
+  const data = normalizeAppData(chosen ?? createEmptyAppData())
+  useAppStore.getState().hydrateData(data)
+}

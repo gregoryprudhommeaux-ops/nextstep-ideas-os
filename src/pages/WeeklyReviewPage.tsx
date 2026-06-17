@@ -1,7 +1,8 @@
-import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { SectionHeader } from '../components/SectionHeader'
 import { useAppStore, EMPTY_IDEAS, EMPTY_WEEKLY_REVIEWS } from '../app/store'
+import { WeeklyReviewForm } from '../features/review/WeeklyReviewForm'
+import { Link } from 'react-router-dom'
 
 function IdeaChipList({ ids, label }: { ids?: string[]; label: string }) {
   const ideas = useAppStore((s) => s.data?.ideas ?? EMPTY_IDEAS)
@@ -32,53 +33,50 @@ function IdeaChipList({ ids, label }: { ids?: string[]; label: string }) {
 export function WeeklyReviewPage() {
   const reviews = useAppStore((s) => s.data?.weeklyReviews ?? EMPTY_WEEKLY_REVIEWS)
   const sorted = [...reviews].sort((a, b) => b.weekLabel.localeCompare(a.weekLabel))
-  const latest = sorted[0]
+  const past = sorted.slice(1)
 
   return (
     <div className="space-y-8">
       <SectionHeader
         eyebrow="Decision rhythm"
         title="Weekly review"
-        description="Guided strategic review — momentum, alignment, and portfolio moves."
+        description="Three guided questions each week — your decision journal."
       />
 
-      {latest ? (
-        <Card className="border-primary/20 bg-primary/5 p-6">
-          <div className="text-micro text-tertiary/60">Current week</div>
-          <div className="mt-1 text-xl font-black tracking-tight text-midnight">{latest.weekLabel}</div>
-          {latest.summary ? (
-            <p className="mt-3 max-w-prose text-sm leading-relaxed text-tertiary/80">{latest.summary}</p>
-          ) : null}
-        </Card>
-      ) : null}
+      <WeeklyReviewForm />
 
-      <div className="space-y-6">
-        {sorted.map((review) => (
-          <Card key={review.id} className="p-6">
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
+      {past.length > 0 ? (
+        <div className="space-y-6">
+          <div className="text-micro text-tertiary/60">Past reviews</div>
+          {past.map((review) => (
+            <Card key={review.id} className="p-6">
               <div className="text-lg font-black tracking-tight text-midnight">{review.weekLabel}</div>
-            </div>
-            {review.summary ? (
-              <p className="mt-3 text-sm leading-relaxed text-tertiary/75">{review.summary}</p>
-            ) : null}
-
-            <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
-              <IdeaChipList ids={review.ideasToExplore} label="Explore" />
-              <IdeaChipList ids={review.ideasToTest} label="Test" />
-              <IdeaChipList ids={review.ideasToPause} label="Pause" />
-              <IdeaChipList ids={review.mergeCandidates} label="Merge candidates" />
-              <IdeaChipList ids={review.umbrellaCandidates} label="Umbrella candidates" />
-            </div>
-
-            {review.reflections ? (
-              <div className="mt-6 border-t border-alternate/50 pt-5">
-                <div className="text-micro text-tertiary/55">Reflections</div>
-                <p className="mt-2 text-sm leading-relaxed text-tertiary/80">{review.reflections}</p>
+              {review.qStatusChange ? (
+                <div className="mt-4">
+                  <div className="text-micro text-tertiary/55">Moved</div>
+                  <p className="mt-1 text-sm text-tertiary/80">{review.qStatusChange}</p>
+                </div>
+              ) : null}
+              {review.qSynergy ? (
+                <div className="mt-4">
+                  <div className="text-micro text-tertiary/55">Synergy</div>
+                  <p className="mt-1 text-sm text-tertiary/80">{review.qSynergy}</p>
+                </div>
+              ) : null}
+              {review.qDeprioritize ? (
+                <div className="mt-4">
+                  <div className="text-micro text-tertiary/55">Deprioritized</div>
+                  <p className="mt-1 text-sm text-tertiary/80">{review.qDeprioritize}</p>
+                </div>
+              ) : null}
+              <div className="mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <IdeaChipList ids={review.ideasToExplore} label="Explore" />
+                <IdeaChipList ids={review.ideasToTest} label="Test" />
               </div>
-            ) : null}
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      ) : null}
     </div>
   )
 }

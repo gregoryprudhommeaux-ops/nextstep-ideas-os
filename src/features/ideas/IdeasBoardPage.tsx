@@ -3,6 +3,7 @@ import { useActiveProfile, useAppStore, useRankedIdeas } from '../../app/store'
 import { IdeaCard } from './IdeaCard'
 import { SectionHeader } from '../../components/SectionHeader'
 import { EmptyState } from '../../components/EmptyState'
+import { Button } from '../../components/ui/Button'
 import type { Idea, IdeaCategory, IdeaStatus, ScoringProfile } from '../../types/domain'
 import { statusLabels } from '../../lib/labels'
 import { cn } from '../../lib/cn'
@@ -72,6 +73,11 @@ export function IdeasBoardPage() {
         eyebrow="Portfolio"
         title="Ideas board"
         description="A strategic portfolio view — ranked by your active scoring lens."
+        action={
+          <Link to="/app/ideas/new">
+            <Button>+ New idea</Button>
+          </Link>
+        }
       />
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
@@ -152,15 +158,17 @@ export function IdeasBoardPage() {
 
       {noResults ? (
         <EmptyState
-          title={hasFilters ? 'No ideas match your filters' : 'No ideas in portfolio'}
+          title={hasFilters ? 'No ideas match your filters' : 'Your portfolio is empty'}
           description={
             hasFilters
-              ? 'Try clearing search or filters to see the full board.'
-              : 'Seed data will appear once loaded.'
+              ? 'Try clearing search or filters.'
+              : 'Start with one idea — capture the title, then enrich the brief step by step.'
           }
+          actionLabel={hasFilters ? undefined : 'Capture my first idea'}
+          actionTo={hasFilters ? undefined : '/app/ideas/new'}
         />
       ) : (
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+        <div className="-mx-4 flex gap-4 overflow-x-auto px-4 pb-2 lg:mx-0 lg:grid lg:grid-cols-5 lg:overflow-visible lg:px-0 lg:pb-0 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {columns.map((c) => {
             const list = sortIdeas(
               filtered.filter((i) => i.status === c.status),
@@ -168,7 +176,7 @@ export function IdeasBoardPage() {
               profile
             )
             return (
-              <div key={c.status} className="min-w-0">
+              <div key={c.status} className="min-w-[min(100%,17.5rem)] shrink-0 lg:min-w-0">
                 <div className="mb-3 flex items-baseline justify-between border-b border-alternate/50 pb-2">
                   <div className="text-micro font-semibold text-tertiary/70">{c.label}</div>
                   <div className="text-xs font-semibold tabular-nums text-tertiary/55">{list.length}</div>

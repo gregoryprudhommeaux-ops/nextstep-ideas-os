@@ -1,4 +1,11 @@
 import type { Timestamp } from 'firebase/firestore'
+import type {
+  AIProvider,
+  ClassificationProposal,
+  ClarifyingQuestion,
+  IdeaAIAnalysis,
+  MarketResearchResult,
+} from './ai'
 
 export type Role = 'owner' | 'viewer'
 
@@ -65,6 +72,25 @@ export type UserProfile = WithTimestamps & {
   role: Role
 }
 
+export type InspirationKind =
+  | 'website'
+  | 'google_drive'
+  | 'pdf'
+  | 'conversation'
+  | 'screenshot'
+  | 'voice_note'
+
+export type IdeaInspiration = WithTimestamps & {
+  id: string
+  kind: InspirationKind
+  /** Short label, e.g. "Competitor deck" */
+  label?: string
+  /** Link — website, Google Drive, PDF, image, or audio URL */
+  url?: string
+  /** Pasted conversation or brainstorm note (for kind=conversation) */
+  content?: string
+}
+
 export type Idea = WithTimestamps & {
   id: string
   title: string
@@ -102,6 +128,18 @@ export type Idea = WithTimestamps & {
 
   tagIds: string[]
   umbrellaGroupId?: string | null
+  /** Links, decks, chats, voice notes that sparked this idea */
+  inspirations?: IdeaInspiration[]
+
+  scoreSource?: 'manual' | 'ai' | 'hybrid'
+  aiAnalysis?: IdeaAIAnalysis & { analyzedAt: FirestoreTime; provider: AIProvider }
+  portfolioRole?: 'standalone' | 'extension' | 'variant'
+  parentIdeaId?: string
+  extensionNote?: string
+  captureSource?: 'manual' | 'brainstorm'
+  brainstormSessionId?: string
+
+  marketResearch?: MarketResearchResult & { researchedAt: FirestoreTime }
 }
 
 export type FilterDefinition = WithTimestamps & {
@@ -176,6 +214,12 @@ export type WeeklyReview = WithTimestamps & {
   id: string
   weekLabel: string
   summary?: string
+  /** Guided reflection — status moves this week */
+  qStatusChange?: string
+  /** Guided reflection — synergies noticed */
+  qSynergy?: string
+  /** Guided reflection — what to deprioritize */
+  qDeprioritize?: string
   ideasToExplore?: string[]
   ideasToPause?: string[]
   ideasToTest?: string[]
@@ -197,5 +241,62 @@ export type Tag = {
   label: string
   colorStyle: string
   createdAt: FirestoreTime
+}
+
+export type BrainstormPhase =
+  | 'input'
+  | 'clarifying'
+  | 'proposing'
+  | 'applied'
+  | 'cancelled'
+
+export type FounderProfile = WithTimestamps & {
+  id: string
+  userId: string
+  whoIAmRaw: string
+  whoIAm: {
+    experienceSummary: string
+    skills: string[]
+    location?: string
+    timeConstraints?: string
+  }
+  whatIWantRaw: string
+  whatIWant: {
+    lifestyleVision: string
+    revenueTarget?: string
+    autonomyVsSalary: 'autonomy' | 'salary' | 'balanced' | 'unknown'
+    horizonYears?: number
+  }
+  howIWorkRaw: string
+  howIWork: {
+    personalitySummary: string
+    riskTolerance: 'low' | 'medium' | 'high' | 'unknown'
+    energyDrivers: string[]
+    energyDrains: string[]
+  }
+  onboardingCompletedAt?: FirestoreTime
+  lastStructuredAt?: FirestoreTime
+}
+
+export type BrainstormSession = WithTimestamps & {
+  id: string
+  phase: BrainstormPhase
+  rawInput: string
+  inspirations?: IdeaInspiration[]
+  questions: ClarifyingQuestion[]
+  answers: Record<string, string>
+  proposal?: ClassificationProposal
+  resultIdeaId?: string
+  resultLinkId?: string
+}
+
+export type SharedBase = WithTimestamps & {
+  id: string
+  name: string
+  description: string
+  ideaIds: string[]
+  sharedDimensions: ('audience' | 'infra' | 'brand' | 'backOffice' | 'channels')[]
+  aiSuggested: boolean
+  confirmedByUser: boolean
 }
 

@@ -2,6 +2,7 @@ import { Link, useParams } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useMemo } from 'react'
 import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
 import { useActiveProfile, useAppStore, useIdeaScore, EMPTY_DECISION_NOTES, EMPTY_IDEAS, EMPTY_SYNERGY_LINKS } from '../app/store'
 import { ScorePill } from '../components/score/ScorePill'
 import { TagBadge } from '../components/TagBadge'
@@ -15,9 +16,11 @@ import {
   detectTensions,
 } from '../features/scoring/tensions'
 import { categoryLabels, horizonLabels, statusLabels } from '../lib/labels'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import { SynergyStrengthBadge } from '../components/SynergyStrengthBadge'
 import { getLinksForIdea, getPartnerId } from '../features/synergy/synergyUtils'
+import { InspirationList } from '../features/ideas/InspirationEditor'
+import { IdeaMarketResearchPanel } from '../features/ideas/IdeaMarketResearchPanel'
 
 function MemoSection({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -84,6 +87,18 @@ export function IdeaDetailPage() {
           {idea.oneLiner ? (
             <p className="mt-3 text-sm leading-relaxed text-tertiary/75">{idea.oneLiner}</p>
           ) : null}
+          {idea.parentIdeaId ? (
+            <p className="mt-2 text-xs text-tertiary/60">
+              Extension de{' '}
+              <Link
+                to={`/app/ideas/${idea.parentIdeaId}`}
+                className="font-medium text-midnight underline-offset-2 hover:underline"
+              >
+                {allIdeas.find((i) => i.id === idea.parentIdeaId)?.title ?? 'idée parente'}
+              </Link>
+              {idea.extensionNote ? ` — ${idea.extensionNote}` : ''}
+            </p>
+          ) : null}
         </div>
         <Card className="p-4">
           <div className="text-micro text-tertiary/60">Weighted score</div>
@@ -93,11 +108,12 @@ export function IdeaDetailPage() {
           <div className="mt-2 text-right text-xs text-tertiary/60">
             Lens: <span className="text-tertiary/80">{profile?.name ?? '—'}</span>
           </div>
-          {score ? (
-            <div className="mt-2 text-right text-xs text-tertiary/55">
-              Raw {score.rawScore}
-            </div>
-          ) : null}
+          <Link to={`/app/ideas/${idea.id}/edit`} className="mt-4 block">
+            <Button variant="ghost" className="w-full justify-center gap-2">
+              <Pencil className="h-3.5 w-3.5" />
+              Edit idea
+            </Button>
+          </Link>
         </Card>
       </div>
 
@@ -128,18 +144,61 @@ export function IdeaDetailPage() {
         </div>
       </div>
 
+      {(idea.inspirations?.length ?? 0) > 0 ? (
+        <Card className="p-6">
+          <div className="text-micro text-tertiary/60">What inspired this</div>
+          <p className="mt-1 text-xs text-tertiary/60">
+            Decks, sites, conversations, and notes that sparked the idea.
+          </p>
+          <div className="mt-4">
+            <InspirationList items={idea.inspirations ?? []} />
+          </div>
+        </Card>
+      ) : null}
+
+      {idea.aiAnalysis ? (
+        <Card className="border-primary/20 bg-primary/5 p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div className="text-micro text-tertiary/60">Analyse Steven</div>
+            {idea.scoreSource === 'ai' ? (
+              <span className="text-micro text-primary/80">Scores AI</span>
+            ) : null}
+          </div>
+          <p className="mt-3 text-sm leading-relaxed text-tertiary/85">{idea.aiAnalysis.brief}</p>
+          <div className="mt-4">
+            <div className="text-micro text-tertiary/55">Fit fondateur</div>
+            <p className="mt-1 text-sm text-tertiary/80">{idea.aiAnalysis.founderFitNote}</p>
+          </div>
+        </Card>
+      ) : null}
+
+      <IdeaMarketResearchPanel idea={idea} />
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="p-6 lg:col-span-2">
-          <div className="text-micro text-tertiary/60">Overview</div>
-          <p className="mt-4 text-sm leading-relaxed text-tertiary/80">
-            {idea.description || '—'}
-          </p>
-          {idea.whyNow ? (
-            <div className="mt-6 border-t border-alternate/50 pt-5">
-              <div className="text-micro text-tertiary/55">Why now</div>
-              <p className="mt-2 text-sm leading-relaxed text-tertiary/80">{idea.whyNow}</p>
+          <div className="text-micro text-tertiary/60">Strategic brief</div>
+          <div className="mt-4 space-y-4 text-sm leading-relaxed text-tertiary/80">
+            <div>
+              <div className="text-micro text-tertiary/50">Overview</div>
+              <p className="mt-1">{idea.description || '—'}</p>
             </div>
-          ) : null}
+            <div>
+              <div className="text-micro text-tertiary/50">Why now</div>
+              <p className="mt-1">{idea.whyNow || '—'}</p>
+            </div>
+            <div>
+              <div className="text-micro text-tertiary/50">Who for</div>
+              <p className="mt-1">{idea.audience || '—'}</p>
+            </div>
+            <div>
+              <div className="text-micro text-tertiary/50">Revenue model</div>
+              <p className="mt-1">{idea.strategicNotes || '—'}</p>
+            </div>
+            <div>
+              <div className="text-micro text-tertiary/50">Personal note</div>
+              <p className="mt-1">{idea.oneLiner || '—'}</p>
+            </div>
+          </div>
         </Card>
         <Card className="p-6">
           <div className="text-micro text-tertiary/60">Strategic fit</div>

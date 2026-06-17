@@ -26,8 +26,15 @@
 @layer utilities {
   .text-micro {
     font-size: 11px;
-    letter-spacing: 0.16em;
+    font-weight: 600;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
+  }
+
+  @media (max-width: 640px) {
+    .text-micro {
+      letter-spacing: 0.06em;
+    }
   }
 }
 

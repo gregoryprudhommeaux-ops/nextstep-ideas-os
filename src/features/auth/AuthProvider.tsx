@@ -5,6 +5,7 @@ import { isFirebaseConfigured } from '../../config/env'
 import { getFirebaseServices } from '../../services/firebase/firebase'
 import { allowedEmails } from './allowedEmails'
 import { AuthContext, type AuthState } from './AuthContext'
+import { useAppStore } from '../../app/store'
 
 const initialState: AuthState = isFirebaseConfigured()
   ? { user: null, isLoading: true, isAuthorized: false, email: null, configError: undefined }
@@ -19,6 +20,7 @@ const initialState: AuthState = isFirebaseConfigured()
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = React.useState<AuthState>(initialState)
+  const lastUidRef = React.useRef<string | null>(null)
 
   React.useEffect(() => {
     if (!isFirebaseConfigured()) return
@@ -30,6 +32,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     void completeGoogleRedirectSignIn().catch(() => {})
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      const uid = user?.uid ?? null
+      const prevUid = lastUidRef.current
+      if (prevUid !== uid) {
+        useAppStore.getState().resetWorkspace()
+      }
+      lastUidRef.current = uid
+
       const email = (user?.email ?? '').toLowerCase() || null
       const isAuthorized = email ? allowedEmails.has(email) : false
       setState({ user, isLoading: false, isAuthorized, email, configError: undefined })

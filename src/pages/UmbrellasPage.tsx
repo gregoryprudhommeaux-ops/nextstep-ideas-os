@@ -5,6 +5,8 @@ import { SectionHeader } from '../components/SectionHeader'
 import { ScorePill } from '../components/score/ScorePill'
 import { useAppStore, useIdeaScore, EMPTY_IDEAS, EMPTY_UMBRELLA_GROUPS } from '../app/store'
 import { cn } from '../lib/cn'
+import { CreateUmbrellaForm, UmbrellaAssignSelect } from '../features/umbrellas/UmbrellaForms'
+import { EmptyState } from '../components/EmptyState'
 
 function GroupIdeaRow({ ideaId }: { ideaId: string }) {
   const idea = useAppStore((s) => s.data?.ideas.find((i) => i.id === ideaId))
@@ -36,6 +38,15 @@ export function UmbrellasPage() {
         title="Umbrella groups"
         description="Cluster ideas under shared brand logic. Cohesion scores surface fit — tension notes flag dilution risk."
       />
+
+      <CreateUmbrellaForm />
+
+      {groups.length === 0 ? (
+        <EmptyState
+          title="No umbrella groups yet"
+          description="Cluster related ideas under a shared brand logic when you're ready."
+        />
+      ) : null}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {groups.map((g) => (
@@ -74,6 +85,7 @@ export function UmbrellasPage() {
                   <GroupIdeaRow key={id} ideaId={id} />
                 ))}
               </div>
+              <UmbrellaAssignSelect umbrellaId={g.id} ideaIds={g.ideaIds} />
             </div>
 
             <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-alternate/40">

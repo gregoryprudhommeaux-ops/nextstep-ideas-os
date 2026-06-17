@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { ArrowRight, ExternalLink } from 'lucide-react'
 import * as React from 'react'
 import { Button } from '../../components/ui/Button'
@@ -47,7 +48,9 @@ export function LoginPage() {
               <div className="text-micro text-background/60">Private founder cockpit</div>
             </div>
           </div>
-          <div className="text-micro text-background/60">STEP 1 — Foundation</div>
+          <Link to="/" className="text-micro text-background/60 hover:text-background">
+            ← How it works
+          </Link>
         </div>
       </header>
 

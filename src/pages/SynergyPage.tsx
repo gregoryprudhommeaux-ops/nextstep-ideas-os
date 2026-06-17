@@ -10,6 +10,8 @@ import {
   sortLinksByScore,
 } from '../features/synergy/synergyUtils'
 import type { SynergyStrength } from '../types/domain'
+import { AddSynergyForm } from '../features/synergy/AddSynergyForm'
+import { EmptyState } from '../components/EmptyState'
 import { cn } from '../lib/cn'
 
 export function SynergyPage() {
@@ -28,6 +30,17 @@ export function SynergyPage() {
         title="Synergy map"
         description="Strategic connections between ideas — ranked by synergy score, not a messy graph."
       />
+
+      <AddSynergyForm />
+
+      {ideas.length < 2 && links.length === 0 ? (
+        <EmptyState
+          title="Need at least two ideas"
+          description="Capture a few ideas first, then link the ones that reinforce each other."
+          actionLabel="Go to ideas board"
+          actionTo="/app/ideas"
+        />
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         {(['all', 'strong', 'medium', 'weak', 'conflict'] as const).map((s) => (

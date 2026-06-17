@@ -26,7 +26,7 @@ export function ProfileSwitcher({ variant = 'header' }: { variant?: 'header' | '
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          'flex items-center gap-2 rounded-[--radius-sharp] border px-3 py-1.5 text-left transition',
+          'flex max-w-[10rem] items-center gap-2 rounded-[--radius-sharp] border px-2.5 py-1.5 text-left transition sm:max-w-[12rem] sm:px-3',
           isHeader
             ? 'border-background/20 bg-background/5 hover:border-background/30 hover:bg-background/10'
             : 'border-alternate/70 bg-background hover:border-alternate'

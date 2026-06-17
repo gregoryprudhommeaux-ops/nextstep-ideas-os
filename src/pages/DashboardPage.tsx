@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
+import { Button } from '../components/ui/Button'
 import { useActiveProfile, useAppStore, useRankedIdeas, EMPTY_IDEAS, EMPTY_SYNERGY_LINKS, EMPTY_WEEKLY_REVIEWS } from '../app/store'
 import { SectionHeader } from '../components/SectionHeader'
 import { StatCard } from '../components/StatCard'
@@ -49,6 +50,38 @@ export function DashboardPage() {
   const needingValidation = ideas
     .filter((i) => i.status === 'explore' || i.status === 'validate')
     .slice(0, 5)
+
+  if (total === 0) {
+    return (
+      <div className="space-y-8">
+        <SectionHeader
+          eyebrow="Welcome"
+          title="Your strategic cockpit"
+          description="Start light. Capture one idea, score it subjectively, then grow your portfolio week by week."
+        />
+        <Card className="border-primary/25 bg-primary/5 p-8">
+          <div className="text-micro text-tertiary/60">Getting started</div>
+          <ol className="mt-4 space-y-3 text-sm leading-relaxed text-tertiary/80">
+            <li>
+              <span className="font-semibold text-midnight">1.</span> Capture an idea (title + short
+              description)
+            </li>
+            <li>
+              <span className="font-semibold text-midnight">2.</span> Complete the strategic brief
+              and tune your scores
+            </li>
+            <li>
+              <span className="font-semibold text-midnight">3.</span> Link ideas, group umbrellas,
+              run a weekly review
+            </li>
+          </ol>
+          <Link to="/app/ideas/new" className="mt-6 inline-block">
+            <Button size="lg">Capture my first idea</Button>
+          </Link>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">

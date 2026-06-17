@@ -1,14 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // STEP 1: This ruleset is a safe default for a private app.
-    // - Requires authentication for all reads/writes.
-    // - Whitelist enforcement is done client-side via VITE_ALLOWED_EMAILS in STEP 1.
-    // For stronger enforcement at the rules level, move whitelist to Firestore (allowedEmails/{email})
-    // or use custom claims.
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    // Workspace sync — one doc per user at users/{uid}/workspace/main
+    match /users/{userId}/workspace/{docId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
-

@@ -1,11 +1,18 @@
 import { ShieldX } from 'lucide-react'
 import { Button } from '../../components/ui/Button'
 import { Card } from '../../components/ui/Card'
+import { useAppStore } from '../../app/store'
 import { signOutUser } from '../../services/firebase/auth'
 import { useAuth } from './useAuth'
 
 export function RestrictedPage() {
   const { email } = useAuth()
+  const resetWorkspace = useAppStore((s) => s.resetWorkspace)
+
+  const handleSignOut = () => {
+    resetWorkspace()
+    void signOutUser()
+  }
 
   return (
     <div className="flex min-h-dvh w-full flex-col bg-mineral">
@@ -44,7 +51,7 @@ export function RestrictedPage() {
           </div>
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <Button variant="ghost" onClick={() => void signOutUser()}>
+            <Button variant="ghost" onClick={handleSignOut}>
               Sign out
             </Button>
           </div>
