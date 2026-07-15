@@ -18,10 +18,11 @@ function getConfigurableProviders(): AIProvider[] {
 type Props = {
   settings: AISettings
   onSave: (next: AISettings) => Promise<void>
+  onSaveKey: (provider: AIProvider, apiKey: string) => Promise<void>
   onTest: (provider: AIProvider, apiKey: string) => Promise<{ ok: boolean; error?: string }>
 }
 
-export function APIKeysSettings({ settings, onSave, onTest }: Props) {
+export function APIKeysSettings({ settings, onSave, onSaveKey, onTest }: Props) {
   const providers = React.useMemo(() => getConfigurableProviders(), [])
   const [selected, setSelected] = React.useState<AIProvider>(
     settings.defaultAnalysisProvider && providers.includes(settings.defaultAnalysisProvider)
@@ -30,6 +31,7 @@ export function APIKeysSettings({ settings, onSave, onTest }: Props) {
   )
   const [draftKeys, setDraftKeys] = React.useState<Partial<Record<AIProvider, string>>>({})
   const [testing, setTesting] = React.useState(false)
+  const [saving, setSaving] = React.useState(false)
   const [testError, setTestError] = React.useState<string | null>(null)
 
   const getDraftKey = (provider: AIProvider) =>
@@ -38,6 +40,20 @@ export function APIKeysSettings({ settings, onSave, onTest }: Props) {
   const selectedConfig = settings.providers[selected]
   const selectedStatus = selectedConfig?.lastTestStatus
   const currentKey = getDraftKey(selected)
+
+  async function handleSaveKey() {
+    const apiKey = currentKey.trim()
+    if (!apiKey) return
+    setSaving(true)
+    setTestError(null)
+    await onSaveKey(selected, apiKey)
+    setDraftKeys((prev) => {
+      const next = { ...prev }
+      delete next[selected]
+      return next
+    })
+    setSaving(false)
+  }
 
   async function handleTest() {
     const apiKey = currentKey.trim()
@@ -103,14 +119,15 @@ export function APIKeysSettings({ settings, onSave, onTest }: Props) {
 
         <div className="flex flex-wrap gap-2">
           {providers.map((provider) => {
+            if (!settings.providers[provider]?.apiKey?.trim()) return null
             const status = settings.providers[provider]?.lastTestStatus
-            if (status !== 'ok') return null
             return (
               <span
                 key={provider}
                 className="rounded-full border border-primary/30 bg-primary/10 px-2.5 py-0.5 text-[11px] font-medium text-midnight"
               >
-                {PROVIDER_LABELS[provider].split(' ')[0]} ✓
+                {PROVIDER_LABELS[provider].split(' ')[0]}
+                {status === 'ok' ? ' ✓' : status === 'error' ? ' ·' : ''}
               </span>
             )
           })}
@@ -126,14 +143,23 @@ export function APIKeysSettings({ settings, onSave, onTest }: Props) {
           />
         </Field>
 
-        <Button
-          type="button"
-          variant="ghost"
-          disabled={!currentKey.trim() || testing}
-          onClick={() => void handleTest()}
-        >
-          {testing ? 'Test en cours…' : 'Tester la connexion'}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            type="button"
+            disabled={!currentKey.trim() || saving}
+            onClick={() => void handleSaveKey()}
+          >
+            {saving ? 'Enregistrement…' : 'Enregistrer la clé'}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={!currentKey.trim() || testing}
+            onClick={() => void handleTest()}
+          >
+            {testing ? 'Test en cours…' : 'Tester la connexion'}
+          </Button>
+        </div>
 
         {testError ? <p className="text-sm text-red-600">{testError}</p> : null}
 

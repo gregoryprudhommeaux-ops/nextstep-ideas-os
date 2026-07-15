@@ -7,6 +7,7 @@ export function useAIRouterContext(): AIRouterContext & { loaded: boolean; isAva
   const founderProfile = useAppStore((s) => s.data?.founderProfile ?? null)
   const ideas = useAppStore((s) => s.data?.ideas ?? [])
   const umbrellaGroups = useAppStore((s) => s.data?.umbrellaGroups ?? [])
+  const synergyLinks = useAppStore((s) => s.data?.synergyLinks ?? [])
   const steven = useAppStore((s) => s.data?.steven)
   const { settings, loaded, isAvailable } = useAISettings()
 
@@ -22,8 +23,9 @@ export function useAIRouterContext(): AIRouterContext & { loaded: boolean; isAva
       founderProfile,
       ideas,
       umbrellaGroups,
+      synergyLinks,
     }),
-    [settings, steven, founderProfile, ideas, umbrellaGroups]
+    [settings, steven, founderProfile, ideas, umbrellaGroups, synergyLinks]
   )
 
   return { ...ctx, loaded, isAvailable }

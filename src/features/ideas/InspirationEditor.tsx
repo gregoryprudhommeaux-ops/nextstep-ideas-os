@@ -30,13 +30,18 @@ function emptyDraft(kind: InspirationKind = 'website'): IdeaInspiration {
 export function InspirationEditor({
   value,
   onChange,
+  mode = 'inspiration',
+  disabled = false,
 }: {
   value: IdeaInspiration[]
   onChange: (next: IdeaInspiration[]) => void
+  mode?: 'inspiration' | 'attachment'
+  disabled?: boolean
 }) {
   const [draft, setDraft] = React.useState<IdeaInspiration | null>(null)
+  const isAttachment = mode === 'attachment'
 
-  const addDraft = () => setDraft(emptyDraft())
+  const addDraft = () => setDraft(emptyDraft(isAttachment ? 'pdf' : 'website'))
 
   const commitDraft = () => {
     if (!draft) return
@@ -92,8 +97,9 @@ export function InspirationEditor({
           <button
             type="button"
             onClick={() => remove(item.id)}
-            className="shrink-0 rounded p-1 text-tertiary/50 hover:bg-background hover:text-midnight"
-            aria-label="Remove"
+            disabled={disabled}
+            className="shrink-0 rounded p-1 text-tertiary/50 hover:bg-background hover:text-midnight disabled:opacity-40"
+            aria-label="Supprimer"
           >
             <Trash2 className="h-3.5 w-3.5" />
           </button>
@@ -108,6 +114,7 @@ export function InspirationEditor({
               onChange={(e) =>
                 setDraft((d) => (d ? { ...d, kind: e.target.value as InspirationKind } : d))
               }
+              disabled={disabled}
             >
               {kinds.map((k) => (
                 <option key={k} value={k}>
@@ -116,20 +123,29 @@ export function InspirationEditor({
               ))}
             </Select>
           </Field>
-          <Field label="Label (optional)" hint="e.g. Competitor deck, Chat with Marc">
+          <Field
+            label="Libellé (optionnel)"
+            hint={
+              isAttachment
+                ? 'ex. Deck franchise, étude marché, article presse'
+                : 'ex. deck concurrent, chat avec Marc'
+            }
+          >
             <Input
               value={draft.label ?? ''}
               onChange={(e) => setDraft((d) => (d ? { ...d, label: e.target.value } : d))}
-              placeholder="Short name"
+              placeholder={isAttachment ? 'Nom du document' : 'Nom court'}
+              disabled={disabled}
             />
           </Field>
           {inspirationUsesUrl(draft.kind) ? (
-            <Field label="Link" hint={inspirationKindHints[draft.kind]}>
+            <Field label="Lien" hint={inspirationKindHints[draft.kind]}>
               <Input
                 type="url"
                 value={draft.url ?? ''}
                 onChange={(e) => setDraft((d) => (d ? { ...d, url: e.target.value } : d))}
                 placeholder="https://"
+                disabled={disabled}
               />
             </Field>
           ) : (
@@ -138,22 +154,25 @@ export function InspirationEditor({
                 value={draft.content ?? ''}
                 onChange={(e) => setDraft((d) => (d ? { ...d, content: e.target.value } : d))}
                 rows={4}
-                placeholder="Paste the exchange or voice transcript…"
+                placeholder="Collez l'échange ou la transcription vocale…"
+                disabled={disabled}
               />
             </Field>
           )}
-          <div className="flex gap-2">
-            <Button type="button" size="md" onClick={commitDraft}>
-              Add source
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" size="md" onClick={commitDraft} disabled={disabled}>
+              {isAttachment ? 'Ajouter l’attachement' : 'Ajouter la source'}
             </Button>
-            <Button type="button" variant="ghost" onClick={() => setDraft(null)}>
-              Cancel
+            <Button type="button" variant="ghost" onClick={() => setDraft(null)} disabled={disabled}>
+              Annuler
             </Button>
           </div>
         </div>
       ) : (
-        <Button type="button" variant="ghost" onClick={addDraft}>
-          + Add inspiration source
+        <Button type="button" variant="ghost" onClick={addDraft} disabled={disabled}>
+          {isAttachment
+            ? '+ Ajouter un document ou lien'
+            : '+ Ajouter une source d’inspiration'}
         </Button>
       )}
     </div>
@@ -179,7 +198,7 @@ export function InspirationList({ items }: { items: IdeaInspiration[] }) {
             {inspirationKindLabels[item.kind]}
           </div>
           <div className="mt-1 text-sm font-semibold text-midnight">
-            {item.label || 'Untitled source'}
+            {item.label || 'Source sans titre'}
           </div>
           {item.url ? (
             <a
@@ -188,7 +207,7 @@ export function InspirationList({ items }: { items: IdeaInspiration[] }) {
               rel="noreferrer"
               className="mt-2 inline-block text-xs text-tertiary/75 underline-offset-2 hover:text-midnight hover:underline"
             >
-              Open link →
+              Ouvrir le lien →
             </a>
           ) : null}
           {item.content ? (

@@ -15,7 +15,7 @@ export function detectTensions(idea: Idea): Tension[] {
   if (idea.excitementLevel >= HIGH && idea.speedToValidation < LOW) {
     tensions.push({
       id: 'excitement-vs-speed',
-      label: 'High excitement, slow validation',
+      label: 'Forte excitation, validation lente',
       severity: 'high',
     })
   }
@@ -23,7 +23,7 @@ export function detectTensions(idea: Idea): Tension[] {
   if (idea.personalAlignment >= HIGH && idea.scalabilityFit < LOW) {
     tensions.push({
       id: 'alignment-vs-scale',
-      label: 'High alignment, low scalability',
+      label: 'Fort alignement, faible scalability',
       severity: 'medium',
     })
   }
@@ -31,7 +31,7 @@ export function detectTensions(idea: Idea): Tension[] {
   if (idea.revenuePotential >= HIGH && idea.complexityLevel >= HIGH) {
     tensions.push({
       id: 'revenue-vs-complexity',
-      label: 'High revenue potential, high complexity',
+      label: 'Fort potentiel revenu, haute complexité',
       severity: 'high',
     })
   }
@@ -39,7 +39,7 @@ export function detectTensions(idea: Idea): Tension[] {
   if (idea.excitementLevel >= HIGH && idea.personalAlignment < LOW) {
     tensions.push({
       id: 'excitement-vs-alignment',
-      label: 'Attractive but weak personal fit',
+      label: 'Séduisant mais faible fit personnel',
       severity: 'medium',
     })
   }
@@ -47,7 +47,7 @@ export function detectTensions(idea: Idea): Tension[] {
   if (idea.revenuePotential >= HIGH && idea.freedomFit < LOW) {
     tensions.push({
       id: 'revenue-vs-freedom',
-      label: 'Strong upside, weak freedom fit',
+      label: 'Fort upside, faible freedom fit',
       severity: 'medium',
     })
   }
@@ -55,7 +55,7 @@ export function detectTensions(idea: Idea): Tension[] {
   if (idea.scalabilityFit >= HIGH && idea.speedToValidation < LOW) {
     tensions.push({
       id: 'scale-vs-speed',
-      label: 'Scalable asset, slow to validate',
+      label: 'Actif scalable, validation lente',
       severity: 'medium',
     })
   }
@@ -65,21 +65,21 @@ export function detectTensions(idea: Idea): Tension[] {
 
 export function detectStrengths(idea: Idea): string[] {
   const strengths: string[] = []
-  if (idea.personalAlignment >= HIGH) strengths.push('Strong personal alignment')
-  if (idea.freedomFit >= HIGH) strengths.push('High freedom potential')
-  if (idea.speedToValidation >= HIGH) strengths.push('Fast to validate')
-  if (idea.scalabilityFit >= HIGH) strengths.push('Scalable structure')
-  if (idea.complexityLevel <= 3) strengths.push('Low complexity')
-  if (idea.capitalIntensity <= 3) strengths.push('Low capital requirement')
+  if (idea.personalAlignment >= HIGH) strengths.push('Fort alignement personnel')
+  if (idea.freedomFit >= HIGH) strengths.push('Fort potentiel de freedom')
+  if (idea.speedToValidation >= HIGH) strengths.push('Validation rapide')
+  if (idea.scalabilityFit >= HIGH) strengths.push('Structure scalable')
+  if (idea.complexityLevel <= 3) strengths.push('Faible complexité')
+  if (idea.capitalIntensity <= 3) strengths.push('Peu de capital requis')
   return strengths.slice(0, 4)
 }
 
 export function detectConstraints(idea: Idea): string[] {
   const constraints: string[] = []
-  if (idea.complexityLevel >= HIGH) constraints.push('High operational complexity')
-  if (idea.capitalIntensity >= HIGH) constraints.push('Capital intensive')
-  if (idea.speedToValidation < LOW) constraints.push('Slow validation path')
-  if (idea.remoteFit < LOW) constraints.push('Limited remote compatibility')
-  if (idea.scalabilityFit < LOW) constraints.push('Limited scalability')
+  if (idea.complexityLevel >= HIGH) constraints.push('Complexité opérationnelle élevée')
+  if (idea.capitalIntensity >= HIGH) constraints.push('Capital intensif')
+  if (idea.speedToValidation < LOW) constraints.push('Chemin de validation lent')
+  if (idea.remoteFit < LOW) constraints.push('Compatibilité remote limitée')
+  if (idea.scalabilityFit < LOW) constraints.push('Scalability limitée')
   return constraints.slice(0, 4)
 }

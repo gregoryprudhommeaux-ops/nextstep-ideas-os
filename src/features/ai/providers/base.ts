@@ -1,5 +1,19 @@
 export type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string }
 
+function explainFetchError(error: unknown): Error {
+  if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    return new Error(
+      import.meta.env.DEV
+        ? 'Requête bloquée par le navigateur — redémarre `npm run dev` (proxy API actif en local).'
+        : 'Requête bloquée par le navigateur (CORS) — configure un proxy relay côté serveur.'
+    )
+  }
+  if (error instanceof Error && error.name === 'AbortError') {
+    return new Error('AI request timed out after 90s', { cause: error })
+  }
+  return error instanceof Error ? error : new Error('Unknown AI request error')
+}
+
 export async function chatCompletion(
   apiKey: string,
   baseUrl: string,
@@ -32,10 +46,7 @@ export async function chatCompletion(
     if (!content) throw new Error('Empty AI response')
     return content
   } catch (e) {
-    if (e instanceof Error && e.name === 'AbortError') {
-      throw new Error('AI request timed out after 90s', { cause: e })
-    }
-    throw e
+    throw explainFetchError(e)
   } finally {
     clearTimeout(timeout)
   }

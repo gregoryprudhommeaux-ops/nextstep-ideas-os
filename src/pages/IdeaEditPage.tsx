@@ -28,9 +28,9 @@ export function IdeaEditPage() {
   if (!idea) {
     return (
       <Card className="p-6">
-        <div className="text-sm text-tertiary/70">Idea not found.</div>
+        <div className="text-sm text-tertiary/70">Idée introuvable.</div>
         <Link to="/app/ideas" className="mt-3 inline-block text-sm text-tertiary hover:text-midnight">
-          ← Back to board
+          ← Retour à la carte
         </Link>
       </Card>
     )
@@ -65,19 +65,19 @@ function IdeaEditForm({ idea }: { idea: Idea }) {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <SectionHeader
-        eyebrow="Step 2–3"
-        title="Develop your idea"
-        description="Complete the strategic brief, then tune your subjective scores."
+        eyebrow="Étapes 2–3"
+        title="Développer votre idée"
+        description="Complétez le brief stratégique, puis ajustez vos scores subjectifs."
         action={score ? <ScorePill score={score.weightedScore} /> : null}
       />
 
       <Card className="space-y-4 p-6">
-        <div className="text-micro text-tertiary/60">Basics</div>
-        <Field label="Title">
+        <div className="text-micro text-tertiary/60">Essentiel</div>
+        <Field label="Titre">
           <Input value={draft.title} onChange={(e) => patch({ title: e.target.value })} />
         </Field>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <Field label="Category">
+          <Field label="Catégorie">
             <Select
               value={draft.category}
               onChange={(e) => patch({ category: e.target.value as IdeaCategory })}
@@ -89,7 +89,7 @@ function IdeaEditForm({ idea }: { idea: Idea }) {
               ))}
             </Select>
           </Field>
-          <Field label="Status">
+          <Field label="Statut">
             <Select
               value={draft.status}
               onChange={(e) => patch({ status: e.target.value as IdeaStatus })}
@@ -117,49 +117,53 @@ function IdeaEditForm({ idea }: { idea: Idea }) {
       </Card>
 
       <Card className="space-y-4 p-6">
-        <div className="text-micro text-tertiary/60">Inspiration sources</div>
+        <div className="text-micro text-tertiary/60">Documents & liens</div>
+        <p className="text-xs text-tertiary/60">
+          PDF, deck, site ou article — utile pour Steven et pour toi plus tard.
+        </p>
         <InspirationEditor
+          mode="attachment"
           value={draft.inspirations ?? []}
           onChange={(inspirations) => patch({ inspirations })}
         />
       </Card>
 
       <Card className="space-y-4 p-6">
-        <div className="text-micro text-tertiary/60">Strategic brief</div>
-        <Field label="Why now">
+        <div className="text-micro text-tertiary/60">Brief stratégique</div>
+        <Field label="Pourquoi maintenant">
           <Textarea value={draft.whyNow ?? ''} onChange={(e) => patch({ whyNow: e.target.value })} />
         </Field>
-        <Field label="Who for (audience)">
+        <Field label="Pour qui (cible)">
           <Textarea value={draft.audience ?? ''} onChange={(e) => patch({ audience: e.target.value })} />
         </Field>
-        <Field label="Revenue model note" hint="How could this make money?">
+        <Field label="Note sur le modèle de revenu" hint="Comment cela pourrait-il générer des revenus ?">
           <Textarea
             value={draft.strategicNotes ?? ''}
             onChange={(e) => patch({ strategicNotes: e.target.value })}
           />
         </Field>
-        <Field label="Key risk">
+        <Field label="Risque clé">
           <Textarea value={draft.risks ?? ''} onChange={(e) => patch({ risks: e.target.value })} />
         </Field>
-        <Field label="Personal alignment note">
+        <Field label="Note d&apos;alignement personnel">
           <Textarea
             value={draft.oneLiner ?? ''}
             onChange={(e) => patch({ oneLiner: e.target.value })}
-            placeholder="Why does this matter to you?"
+            placeholder="Pourquoi cela compte-t-il pour vous ?"
           />
         </Field>
-        <Field label="First test">
+        <Field label="Premier test">
           <Textarea value={draft.firstTest ?? ''} onChange={(e) => patch({ firstTest: e.target.value })} />
         </Field>
-        <Field label="Next step">
+        <Field label="Prochaine étape">
           <Textarea value={draft.nextStep ?? ''} onChange={(e) => patch({ nextStep: e.target.value })} />
         </Field>
       </Card>
 
       <Card className="space-y-4 p-6">
-        <div className="text-micro text-tertiary/60">Your scores (1–10)</div>
+        <div className="text-micro text-tertiary/60">Vos scores (1–10)</div>
         <p className="text-xs text-tertiary/60">
-          Subjective — adjust until the ranking feels right for you.
+          Subjectif — ajustez jusqu&apos;à ce que le classement vous semble juste.
         </p>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {scoreFields.map((key) => {
@@ -183,7 +187,7 @@ function IdeaEditForm({ idea }: { idea: Idea }) {
                 label={meta.label}
                 value={val as number}
                 onChange={(n) => patch({ [key]: n } as Partial<Idea>)}
-                hint={meta.kind === 'penalty' ? 'Higher = more penalty' : undefined}
+                hint={meta.kind === 'penalty' ? 'Plus élevé = pénalité plus forte' : undefined}
               />
             )
           })}
@@ -201,7 +205,7 @@ function IdeaEditForm({ idea }: { idea: Idea }) {
               patch({ umbrellaGroupId: v || null })
             }}
           >
-            <option value="">No umbrella</option>
+            <option value="">Aucun Umbrella</option>
             {umbrellas.map((u) => (
               <option key={u.id} value={u.id}>
                 {u.name}
@@ -211,24 +215,32 @@ function IdeaEditForm({ idea }: { idea: Idea }) {
         </Card>
       ) : null}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-2">
-          <Button onClick={save}>Save idea</Button>
-          <Link to={`/app/ideas/${idea.id}`}>
-            <Button variant="ghost">Cancel</Button>
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button onClick={save} className="w-full sm:w-auto">
+            Enregistrer l&apos;idée
+          </Button>
+          <Link to={`/app/ideas/${idea.id}`} className="w-full sm:w-auto">
+            <Button variant="ghost" className="w-full">
+              Annuler
+            </Button>
           </Link>
         </div>
         <Button
           variant="ghost"
-          className="text-tertiary/70"
+          className="w-full text-red-700 hover:bg-red-50 hover:text-red-800 sm:w-auto"
           onClick={() => {
-            if (confirm('Delete this idea?')) {
+            if (
+              confirm(
+                'Supprimer définitivement cette idée ? Toutes ses données, synergies et notes seront effacées. Action irréversible.'
+              )
+            ) {
               deleteIdea(idea.id)
               navigate('/app/ideas')
             }
           }}
         >
-          Delete
+          Supprimer
         </Button>
       </div>
     </div>

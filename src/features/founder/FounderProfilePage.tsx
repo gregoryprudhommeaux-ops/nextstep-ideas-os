@@ -17,7 +17,7 @@ export function FounderProfilePage() {
   const umbrellaGroups = useAppStore((s) => s.data?.umbrellaGroups ?? [])
   const steven = useAppStore((s) => s.data?.steven)
   const updateFounderProfile = useAppStore((s) => s.updateFounderProfile)
-  const { settings, isAvailable } = useAISettings()
+  const { settings, isTaskAvailable } = useAISettings()
   const [structuring, setStructuring] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [linkedinDraft, setLinkedinDraft] = useState(profile?.linkedinUrl ?? '')
@@ -78,7 +78,7 @@ export function FounderProfilePage() {
         title="Ton contexte"
         description="Ce profil guide l’interprétation de tes idées par Steven."
         action={
-          isAvailable ? (
+          isTaskAvailable('structureProfile') ? (
             <Button type="button" disabled={structuring} onClick={() => void handleStructure()}>
               {structuring ? 'Structuration…' : 'Structurer avec AI'}
             </Button>

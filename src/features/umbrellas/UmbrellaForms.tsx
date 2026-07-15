@@ -30,25 +30,25 @@ export function CreateUmbrellaForm() {
     <div className="space-y-4">
       {!open ? (
         <Button variant="ghost" onClick={() => setOpen(true)}>
-          + Create umbrella
+          + Créer un Umbrella
         </Button>
       ) : (
         <Card className="p-5">
           <form onSubmit={submit} className="space-y-4">
-            <div className="text-micro text-tertiary/60">New umbrella group</div>
-            <Field label="Name">
+            <div className="text-micro text-tertiary/60">Nouveau groupe Umbrella</div>
+            <Field label="Nom">
               <Input value={name} onChange={(e) => setName(e.target.value)} required />
             </Field>
-            <Field label="Brand promise">
+            <Field label="Promesse de marque">
               <Textarea value={promise} onChange={(e) => setPromise(e.target.value)} rows={2} />
             </Field>
-            <Field label="Tension notes (optional)">
+            <Field label="Notes de tension (optionnel)">
               <Textarea value={tension} onChange={(e) => setTension(e.target.value)} rows={2} />
             </Field>
             <div className="flex gap-2">
-              <Button type="submit">Create</Button>
+              <Button type="submit">Créer</Button>
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
-                Cancel
+                Annuler
               </Button>
             </div>
           </form>
@@ -57,7 +57,7 @@ export function CreateUmbrellaForm() {
 
       {ideas.length > 0 ? (
         <p className="text-xs text-tertiary/55">
-          Assign ideas from each umbrella card, or when editing an idea.
+          Assignez les idées depuis chaque carte Umbrella, ou lors de l&apos;édition d&apos;une idée.
         </p>
       ) : null}
     </div>
@@ -86,7 +86,7 @@ export function UmbrellaAssignSelect({
         e.target.value = ''
       }}
     >
-      <option value="">+ Add idea to group…</option>
+      <option value="">+ Ajouter une idée au groupe…</option>
       {unassigned.map((i) => (
         <option key={i.id} value={i.id}>
           {i.title}

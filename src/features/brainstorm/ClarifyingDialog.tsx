@@ -4,8 +4,7 @@ import { Card } from '../../components/ui/Card'
 import { Button } from '../../components/ui/Button'
 import { Textarea } from '../../components/ui/Textarea'
 import { cn } from '../../lib/cn'
-
-const UNSURE_ID = 'unsure'
+import { optionsForDisplay, UNSURE_ANSWER_LABEL } from './clarifyingOptions'
 
 type Props = {
   questions: ClarifyingQuestion[]
@@ -29,7 +28,7 @@ export function ClarifyingDialog({ questions, onSubmit, onBack, loading }: Props
         <Card key={q.id} className="space-y-3 p-5">
           <p className="text-sm font-medium text-midnight">{q.text}</p>
           <div className="space-y-2">
-            {q.options.map((opt) => {
+            {optionsForDisplay(q.options).map((opt) => {
               const selected = answers[q.id] === opt.label
               return (
                 <button
@@ -49,18 +48,18 @@ export function ClarifyingDialog({ questions, onSubmit, onBack, loading }: Props
             })}
             <button
               type="button"
-              onClick={() => setAnswer(q.id, 'Je ne sais pas encore')}
+              onClick={() => setAnswer(q.id, UNSURE_ANSWER_LABEL)}
               className={cn(
                 'w-full rounded-[--radius-sharp] border px-3 py-2.5 text-left text-sm transition',
-                answers[q.id] === 'Je ne sais pas encore'
+                answers[q.id] === UNSURE_ANSWER_LABEL
                   ? 'border-primary bg-primary/10 text-midnight'
                   : 'border-dashed border-alternate/70 text-tertiary/60 hover:border-alternate'
               )}
             >
-              Je ne sais pas encore
+              {UNSURE_ANSWER_LABEL}
             </button>
           </div>
-          {q.allowFreeText && answers[q.id] && answers[q.id] !== UNSURE_ID ? (
+          {q.allowFreeText && answers[q.id] && answers[q.id] !== UNSURE_ANSWER_LABEL ? (
             <Textarea
               rows={2}
               placeholder="Précise si tu veux…"

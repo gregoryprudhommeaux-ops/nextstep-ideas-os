@@ -22,7 +22,7 @@ export function RestrictedPage() {
             <div className="h-7 w-7 rounded-[--radius-sharp] bg-primary" />
             <div className="text-sm font-black tracking-tight">NextStep Idea OS</div>
           </div>
-          <div className="text-micro text-background/60">Access restricted</div>
+          <div className="text-micro text-background/60">Accès restreint</div>
         </div>
       </header>
 
@@ -30,18 +30,18 @@ export function RestrictedPage() {
         <Card className="max-w-2xl p-6">
           <div className="flex items-start justify-between gap-6">
             <div>
-              <div className="text-micro text-tertiary/70">Security</div>
+              <div className="text-micro text-tertiary/70">Sécurité</div>
               <h1 className="mt-3 text-2xl font-black tracking-tight text-midnight">
-                Your email is not authorized
+                Ton e-mail n’est pas autorisé
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-tertiary/80">
-                This workspace is private. Access is restricted to a whitelist configured in
+                Ce workspace est privé. L’accès est limité à une whitelist configurée dans
                 <span className="font-semibold text-tertiary"> `VITE_ALLOWED_EMAILS`</span>.
               </p>
               <div className="mt-4 rounded-[--radius-sharp] border border-alternate/70 bg-mineral px-4 py-3">
-                <div className="text-micro text-tertiary/70">Signed in as</div>
+                <div className="text-micro text-tertiary/70">Connecté en tant que</div>
                 <div className="mt-1 font-mono text-sm text-midnight">
-                  {email ?? '(unknown)'}
+                  {email ?? '(inconnu)'}
                 </div>
               </div>
             </div>
@@ -52,7 +52,7 @@ export function RestrictedPage() {
 
           <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
             <Button variant="ghost" onClick={handleSignOut}>
-              Sign out
+              Déconnexion
             </Button>
           </div>
         </Card>
@@ -60,4 +60,3 @@ export function RestrictedPage() {
     </div>
   )
 }
-

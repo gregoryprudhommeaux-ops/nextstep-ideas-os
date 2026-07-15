@@ -82,7 +82,7 @@ export function FounderOnboardingPage() {
       <SectionHeader
         eyebrow={`Étape ${step + 1} sur ${STEPS.length}`}
         title="Ton profil fondateur"
-        description="Une seule session, en langage naturel. Termine ces 3 blocs pour débloquer Brainstorm, Portfolio et la revue hebdo."
+        description="Une seule session, en langage naturel. Termine ces 3 blocs pour débloquer Brainstorm et Portfolio."
       />
 
       <div className="flex gap-2">

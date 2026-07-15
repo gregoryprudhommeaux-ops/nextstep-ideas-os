@@ -13,15 +13,15 @@ export function getProfileFavoredDimensions(profile: ScoringProfile): string[] {
 export function getProfileExplanation(profile: ScoringProfile): string {
   switch (profile.slug) {
     case 'freedom-first':
-      return 'Prioritizes autonomy, remote leverage, and low operational drag.'
+      return 'Priorise l\'autonomie, le levier remote et une faible charge opérationnelle.'
     case 'cash-flow-first':
-      return 'Prioritizes near-term revenue, fast validation, and practical tests.'
+      return 'Priorise le Revenue potential à court terme, la Validation speed et les tests concrets.'
     case 'scalable-asset-first':
-      return 'Prioritizes compounding assets, ecosystem leverage, and global reach.'
+      return 'Priorise les actifs composants, le levier d\'écosystème et la portée globale.'
     case 'lifestyle-balance':
-      return 'Balances alignment, excitement, and sustainable complexity.'
+      return 'Équilibre l\'alignement personnel, l\'Excitement et une Complexity soutenable.'
     default:
-      return profile.description ?? 'Custom scoring lens.'
+      return profile.description ?? 'Scoring lens personnalisé.'
   }
 }
 

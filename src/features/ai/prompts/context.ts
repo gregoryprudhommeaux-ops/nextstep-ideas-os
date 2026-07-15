@@ -19,6 +19,20 @@ export function buildPortfolioContext(ideas: Idea[], umbrellas: UmbrellaGroup[])
   return `IDÉES EXISTANTES:\n${lines.join('\n')}${umbrellaLines.length ? `\n\nUMBRELLAS:\n${umbrellaLines.join('\n')}` : ''}`
 }
 
+export function buildExistingSynergiesContext(
+  ideas: Idea[],
+  links: { sourceIdeaId: string; targetIdeaId: string; totalSynergyScore: number; notes?: string }[]
+): string {
+  if (links.length === 0) return 'LIENS SYNERGY EXISTANTS: aucun.'
+
+  const title = (id: string) => ideas.find((i) => i.id === id)?.title ?? id
+  const lines = links.map(
+    (l) =>
+      `- ${l.sourceIdeaId} ↔ ${l.targetIdeaId} ("${title(l.sourceIdeaId)}" ↔ "${title(l.targetIdeaId)}") score ${l.totalSynergyScore}${l.notes ? ` — ${l.notes}` : ''}`
+  )
+  return `LIENS SYNERGY EXISTANTS (ne pas reproposer):\n${lines.join('\n')}`
+}
+
 export function buildFounderContext(profile: FounderProfile | null): string {
   if (!profile) return 'Profil fondateur non renseigné.'
 
@@ -31,3 +45,10 @@ Comment je fonctionne: ${profile.howIWorkRaw}`
 
 export const JSON_ONLY_RULE =
   'Réponds UNIQUEMENT avec un objet JSON valide, sans markdown ni texte autour.'
+
+/** Injected into prose-heavy task prompts (Steven system prompt also carries the full doctrine). */
+export const ANTI_SLOP_PROSE_RULE = `PROSE ANTI-AI-SLOP (FR · EN · ES) — obligatoire pour tout texte humain :
+- Personne identifiable, pas « bien écrit IA » uniforme. Pas d'invention de faits/citations/métriques.
+- Interdit : accroches creuses, jargon vide (révolutionner / game-changing / llevar al siguiente nivel), transitions scolaires en série, closes morales, survey-hooks.
+- Syntaxe : — rare (max 1/paragraphe) ; zéro « pas X mais Y » empilés ; pas de triplets rythmiques ; densité irrégulière.
+- Verbes nets, mots courants, hedges naturels, closes ouvertes. ES : ne pas mélanger Mexique et Espagne.`

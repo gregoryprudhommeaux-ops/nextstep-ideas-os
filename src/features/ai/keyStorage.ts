@@ -1,7 +1,18 @@
-import type { AISettings } from '../../types/ai'
+import type { AISettings, AIProvider } from '../../types/ai'
 import { DEFAULT_AI_SETTINGS } from '../../types/ai'
 
 const SETTINGS_KEY = 'nextstep-ai-settings-v1'
+
+function normalizeAISettings(settings: AISettings): AISettings {
+  const providers = { ...settings.providers }
+  for (const provider of Object.keys(providers) as AIProvider[]) {
+    const config = providers[provider]
+    if (config?.apiKey?.trim()) {
+      providers[provider] = { ...config, enabled: true }
+    }
+  }
+  return { ...settings, providers }
+}
 
 async function deriveKey(userId: string): Promise<CryptoKey> {
   const enc = new TextEncoder()
@@ -47,7 +58,7 @@ export async function loadAISettings(userId: string): Promise<AISettings> {
   const session = sessionStorage.getItem(SETTINGS_KEY)
   if (session) {
     try {
-      return JSON.parse(session) as AISettings
+      return normalizeAISettings(JSON.parse(session) as AISettings)
     } catch {
       return { ...DEFAULT_AI_SETTINGS }
     }
@@ -64,7 +75,7 @@ export async function loadAISettings(userId: string): Promise<AISettings> {
       key,
       new Uint8Array(payload.data)
     )
-    return JSON.parse(new TextDecoder().decode(decrypted)) as AISettings
+    return normalizeAISettings(JSON.parse(new TextDecoder().decode(decrypted)) as AISettings)
   } catch {
     return { ...DEFAULT_AI_SETTINGS }
   }

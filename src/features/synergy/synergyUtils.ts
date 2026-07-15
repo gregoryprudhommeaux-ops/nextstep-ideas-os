@@ -8,10 +8,10 @@ export const strengthOrder: Record<SynergyStrength, number> = {
 }
 
 export const strengthLabels: Record<SynergyStrength, string> = {
-  strong: 'Strong',
-  medium: 'Medium',
-  weak: 'Weak',
-  conflict: 'Conflict',
+  strong: 'Fort',
+  medium: 'Moyen',
+  weak: 'Faible',
+  conflict: 'Conflit',
 }
 
 export function getLinksForIdea(links: SynergyLink[], ideaId: string): SynergyLink[] {
@@ -37,6 +37,20 @@ export function getMostConnectedIdeas(ideas: Idea[], links: SynergyLink[], limit
 export function filterLinksByStrength(links: SynergyLink[], strength: SynergyStrength | 'all') {
   if (strength === 'all') return links
   return links.filter((l) => l.synergyStrength === strength)
+}
+
+export function getIsolatedIdeas(ideas: Idea[], links: SynergyLink[]): Idea[] {
+  const connected = new Set<string>()
+  for (const link of links) {
+    connected.add(link.sourceIdeaId)
+    connected.add(link.targetIdeaId)
+  }
+  return ideas.filter((i) => i.status !== 'archive' && !connected.has(i.id))
+}
+
+export function filterLinksForIdea(links: SynergyLink[], ideaId: string | null): SynergyLink[] {
+  if (!ideaId) return links
+  return links.filter((l) => l.sourceIdeaId === ideaId || l.targetIdeaId === ideaId)
 }
 
 export function sortLinksByScore(links: SynergyLink[]) {

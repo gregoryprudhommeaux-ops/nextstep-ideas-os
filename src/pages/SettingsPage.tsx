@@ -17,7 +17,7 @@ import { isFirebaseConfigured } from '../config/env'
 export function SettingsPage() {
   const steven = useAppStore((s) => s.data?.steven)
   const setStevenCustomInstructions = useAppStore((s) => s.setStevenCustomInstructions)
-  const { settings, save, testConnection, loaded, isAvailable } = useAISettings()
+  const { settings, save, testConnection, saveProviderKey, loaded, isAvailable } = useAISettings()
 
   const savedInstructions = steven?.customInstructions ?? ''
   const [override, setOverride] = React.useState<string | null>(null)
@@ -49,6 +49,7 @@ export function SettingsPage() {
         <APIKeysSettings
           settings={settings}
           onSave={save}
+          onSaveKey={saveProviderKey}
           onTest={testConnection}
         />
       ) : null}
@@ -72,7 +73,7 @@ export function SettingsPage() {
       <SectionHeader
         eyebrow="Steven"
         title="Persona & instructions"
-        description="The operational brain behind NextStep Idea OS — persona, reasoning style, and how he accompanies your brainstorms."
+        description="Le cerveau opérationnel derrière NextStep Idea OS — persona, style de raisonnement et façon d'accompagner vos Brainstorms."
       />
 
       <Card className="border-primary/25 bg-primary/5 p-5 sm:p-6">
@@ -83,13 +84,13 @@ export function SettingsPage() {
           <div className="min-w-0 flex-1">
             <div className="text-lg font-black tracking-tight text-midnight">Steven</div>
             <p className="mt-2 max-w-prose text-sm leading-relaxed text-tertiary/80">
-              Mentor opérationnel — not a coach. He clarifies, challenges with care, classifies ideas
-              in your portfolio, and suggests the lightest next step. After each validated brainstorm,
-              his understanding of you evolves automatically.
+              Mentor opérationnel — pas un coach. Il clarifie, challenge avec bienveillance, classe les idées
+              dans votre Portfolio et suggère la prochaine étape la plus légère. Après chaque Brainstorm validé,
+              sa compréhension de vous évolue automatiquement.
             </p>
             <div className="mt-3 text-micro text-tertiary/55">
-              Prompt version {STEVEN_PROMPT_VERSION} · base prompt is read-only (updated with app
-              releases)
+              Version du prompt {STEVEN_PROMPT_VERSION} · le prompt de base est en lecture seule (mis à jour avec
+              les releases de l&apos;app)
             </div>
           </div>
         </div>
@@ -115,10 +116,10 @@ export function SettingsPage() {
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-sm font-bold text-midnight">System prompt</h2>
+          <h2 className="text-sm font-bold text-midnight">Prompt système</h2>
           <p className="mt-1 text-sm text-tertiary/70">
-            Steven&apos;s full persona — identity, experience, lenses, conversation flow, and output
-            format. This is what the AI receives as its core instructions.
+            La persona complète de Steven — identité, expérience, lenses, déroulé de conversation et format
+            de sortie. C&apos;est ce que l&apos;AI reçoit comme instructions de base.
           </p>
         </div>
         <Card className="overflow-hidden p-0">
@@ -130,29 +131,29 @@ export function SettingsPage() {
 
       <section className="space-y-3">
         <div>
-          <h2 className="text-sm font-bold text-midnight">Evolve Steven</h2>
+          <h2 className="text-sm font-bold text-midnight">Faire évoluer Steven</h2>
           <p className="mt-1 text-sm text-tertiary/70">
-            Add ideas, preferences, or comments that should shape how Steven works with you — tone,
-            priorities, sectors to avoid, examples of good feedback, etc. Appended to the system
-            prompt on every session.
+            Ajoutez des idées, préférences ou commentaires qui doivent façonner la façon dont Steven travaille
+            avec vous — ton, priorités, secteurs à éviter, exemples de bon feedback, etc. Ajouté au prompt
+            système à chaque session.
           </p>
         </div>
         <Card className="space-y-4 p-5 sm:p-6">
           <Textarea
             value={draft}
             onChange={(e) => setOverride(e.target.value)}
-            placeholder={`Examples:\n• Prefer shorter answers when I'm on mobile.\n• I'm exploring B2B SaaS and local services — weight both equally.\n• Challenge me more on dispersion — I tend to start too many parallel ideas.\n• When classifying, always mention if an idea could share a back-office with another.`}
+            placeholder={`Exemples :\n• Préférer des réponses plus courtes sur mobile.\n• J'explore le B2B SaaS et les services locaux — pondérer les deux également.\n• Me challenger davantage sur la dispersion — je tends à lancer trop d'idées en parallèle.\n• Lors du classement, toujours mentionner si une idée pourrait partager un back-office avec une autre.`}
             className="min-h-[160px] font-mono text-xs sm:text-sm"
-            aria-label="Custom instructions for Steven"
+            aria-label="Instructions personnalisées pour Steven"
           />
           <div className="flex flex-wrap items-center gap-3">
             <Button onClick={handleSave} disabled={!isDirty}>
-              Save instructions
+              Enregistrer les instructions
             </Button>
             {saved ? (
-              <span className="text-sm text-primary/90">Saved — Steven will use this on next session.</span>
+              <span className="text-sm text-primary/90">Enregistré — Steven utilisera ceci à la prochaine session.</span>
             ) : isDirty ? (
-              <span className="text-sm text-tertiary/55">Unsaved changes</span>
+              <span className="text-sm text-tertiary/55">Modifications non enregistrées</span>
             ) : null}
           </div>
         </Card>
@@ -161,9 +162,9 @@ export function SettingsPage() {
       {(draft.trim() || steven?.learnedContext?.trim()) ? (
         <section className="space-y-3">
           <div>
-            <h2 className="text-sm font-bold text-midnight">Combined prompt preview</h2>
+            <h2 className="text-sm font-bold text-midnight">Aperçu du prompt combiné</h2>
             <p className="mt-1 text-sm text-tertiary/70">
-              What Steven will receive on the next session (base + learned context + your manual notes).
+              Ce que Steven recevra à la prochaine session (base + contexte appris + vos notes manuelles).
             </p>
           </div>
           <Card className="overflow-hidden p-0">

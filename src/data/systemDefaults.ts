@@ -61,6 +61,7 @@ export function createEmptyAppData(): AppData {
     founderProfile: null,
     brainstormSessions: [],
     sharedBases: [],
+    portfolioAnalyses: [],
     steven: createDefaultStevenConfig(),
   }
 }

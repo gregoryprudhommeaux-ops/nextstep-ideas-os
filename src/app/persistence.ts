@@ -33,6 +33,7 @@ function migrateV1toV2(raw: Record<string, unknown>): AppData {
     founderProfile: null,
     brainstormSessions: [],
     sharedBases: [],
+    portfolioAnalyses: [],
     steven: normalizeStevenConfig((raw.steven as AppData['steven']) ?? undefined),
   }
 }
@@ -44,7 +45,8 @@ function parseStoredData(raw: string): AppData | null {
     if (!('version' in parsed) || (parsed as AppData).version !== 2) {
       return reviveTimestamps(migrateV1toV2(parsed as Record<string, unknown>))
     }
-    return reviveTimestamps(parsed as AppData)
+    const data = reviveTimestamps(parsed as AppData)
+    return { ...data, portfolioAnalyses: data.portfolioAnalyses ?? [] }
   } catch {
     return null
   }

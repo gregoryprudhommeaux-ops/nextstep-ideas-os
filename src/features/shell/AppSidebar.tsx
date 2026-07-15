@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom'
 import { Lock } from 'lucide-react'
 import { cn } from '../../lib/cn'
-import { appNavItems, type AppNavItem } from './appNavItems'
+import { appNavItems, settingsNavItem, type AppNavItem } from './appNavItems'
 import { isNavItemActive } from './navActive'
 
 type SidebarItemProps = {
@@ -12,7 +12,8 @@ type SidebarItemProps = {
 }
 
 function SidebarItem({ item, isActive, locked, variant }: SidebarItemProps) {
-  const { to, label, description, icon: Icon } = item
+  const { to, label, shortLabel, description, icon: Icon } = item
+  const displayLabel = variant === 'bottom' ? (shortLabel ?? label) : label
 
   const sidebarClass = cn(
     'flex w-full items-center gap-3 rounded-[--radius-sharp] px-3 py-2.5 text-left transition',
@@ -24,7 +25,8 @@ function SidebarItem({ item, isActive, locked, variant }: SidebarItemProps) {
   )
 
   const bottomClass = cn(
-    'flex min-w-0 flex-1 flex-col items-center gap-1 rounded-[--radius-sharp] px-1 py-2 text-[10px] font-medium transition',
+    'flex min-w-0 flex-col items-center justify-center gap-0.5 rounded-[--radius-sharp] px-0.5 py-2 text-[10px] font-medium leading-tight transition',
+    'min-h-[3.25rem] touch-manipulation',
     isActive && !locked ? 'text-primary' : locked ? 'text-tertiary/35' : 'text-tertiary/55'
   )
 
@@ -46,7 +48,7 @@ function SidebarItem({ item, isActive, locked, variant }: SidebarItemProps) {
           className={cn('h-5 w-5', isActive && !locked ? 'text-primary' : 'text-tertiary/45')}
           strokeWidth={isActive ? 2.25 : 1.75}
         />
-        <span className="truncate">{label}</span>
+        <span className="max-w-full truncate">{displayLabel}</span>
       </>
     )
 
@@ -77,7 +79,7 @@ export function AppSidebar({ onboardingComplete }: { onboardingComplete: boolean
   const { pathname } = useLocation()
 
   return (
-    <aside className="hidden w-56 shrink-0 flex-col border-r border-alternate/30 bg-midnight text-background md:flex lg:w-60">
+    <aside className="hidden min-h-dvh w-56 shrink-0 flex-col border-r border-alternate/30 bg-midnight text-background md:flex lg:w-60">
       <div className="flex h-14 items-center gap-2.5 border-b border-background/10 px-4">
         <div className="h-8 w-8 shrink-0 rounded-[--radius-sharp] bg-primary" />
         <div className="min-w-0 leading-tight">
@@ -103,10 +105,19 @@ export function AppSidebar({ onboardingComplete }: { onboardingComplete: boolean
       </nav>
 
       {!onboardingComplete ? (
-        <div className="border-t border-background/10 p-4 text-xs leading-relaxed text-background/50">
-          Termine les 3 étapes du profil pour débloquer Brainstorm, Portfolio et la revue.
+        <div className="border-t border-background/10 px-4 py-3 text-xs leading-relaxed text-background/50">
+          Termine les 3 étapes du profil pour débloquer Brainstorm et Portfolio.
         </div>
       ) : null}
+
+      <div className="mt-auto border-t border-background/10 p-3">
+        <SidebarItem
+          item={settingsNavItem}
+          isActive={isNavItemActive(pathname, settingsNavItem.to, settingsNavItem.end)}
+          locked={false}
+          variant="sidebar"
+        />
+      </div>
     </aside>
   )
 }
@@ -116,11 +127,11 @@ export function MobileBottomNav({ onboardingComplete }: { onboardingComplete: bo
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-alternate/60 bg-background/95 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md md:hidden"
+      className="fixed inset-x-0 bottom-0 z-20 border-t border-alternate/60 bg-background/95 px-1 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md md:hidden"
       aria-label="Navigation principale"
     >
-      <div className="mx-auto flex max-w-lg items-stretch justify-between">
-        {appNavItems.map((item) => {
+      <div className="mx-auto grid max-w-lg grid-cols-5 gap-0.5">
+        {[...appNavItems, settingsNavItem].map((item) => {
           const locked = Boolean(item.requiresOnboarding && !onboardingComplete)
           const isActive = isNavItemActive(pathname, item.to, item.end)
           return (

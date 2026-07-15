@@ -5,7 +5,6 @@ import {
   Layers,
   LineChart,
   Sparkles,
-  Target,
 } from 'lucide-react'
 import { Button } from '../components/ui/Button'
 import { Card } from '../components/ui/Card'
@@ -15,41 +14,41 @@ import { LoadingScreen } from '../features/shell/LoadingScreen'
 const steps = [
   {
     n: '01',
-    title: 'Capture',
-    body: 'Drop an idea in seconds — title, context, and what inspired it (links, decks, chats, voice notes).',
+    title: 'Capturer',
+    body: 'Déposez une idée en quelques secondes — titre, contexte et ce qui l\'a inspirée (liens, decks, chats, notes vocales).',
   },
   {
     n: '02',
     title: 'Score & brief',
-    body: 'Tune subjective scores and write your strategic brief. Switch lenses to see what rises.',
+    body: 'Ajustez vos scores subjectifs et rédigez votre brief stratégique. Voyez ce qui remonte dans votre Portfolio.',
   },
   {
     n: '03',
-    title: 'Connect & review',
-    body: 'Link synergies, group umbrellas, run a weekly review. Your portfolio becomes a system.',
+    title: 'Connecter & explorer',
+    body: 'Reliez les Synergies, regroupez les Umbrellas, explorez avec Steven. Votre Portfolio devient un système.',
   },
 ]
 
 const pillars = [
   {
     icon: LineChart,
-    title: 'Multi-lens scoring',
-    body: 'Freedom First, Cash Flow First, Scalable Asset — same ideas, different strategic read.',
+    title: 'Score stratégique',
+    body: 'Pondérez alignement, revenus, scalabilité et vitesse de validation — une lecture claire de chaque idée.',
   },
   {
     icon: GitBranch,
     title: 'Synergy map',
-    body: 'See which ideas reinforce each other instead of competing for attention.',
+    body: 'Voyez quelles idées se renforcent mutuellement au lieu de se disputer l\'attention.',
   },
   {
     icon: Layers,
-    title: 'Umbrella groups',
-    body: 'Cluster ideas under shared brand logic when patterns emerge.',
+    title: 'Groupes Umbrella',
+    body: 'Regroupez les idées sous une logique de marque commune quand des patterns émergent.',
   },
   {
-    icon: Target,
-    title: 'Weekly review',
-    body: 'Three guided questions to turn reflection into decisions.',
+    icon: Sparkles,
+    title: 'Exploration Steven',
+    body: 'Enrichissez, challengez ou recentrez chaque idée — et voyez comment tout se connecte.',
   },
 ]
 
@@ -67,12 +66,12 @@ export function LandingPage() {
           <Link
             to="/"
             className="flex items-center gap-3 rounded-[--radius-sharp] transition hover:opacity-90"
-            aria-label="NextStep Idea OS — home"
+            aria-label="NextStep Idea OS — accueil"
           >
             <div className="h-7 w-7 rounded-[--radius-sharp] bg-primary" />
             <div className="leading-tight">
               <div className="text-sm font-black tracking-tight">NextStep Idea OS</div>
-              <div className="text-micro text-background/55">Private founder cockpit</div>
+              <div className="text-micro text-background/55">Cockpit fondateur privé</div>
             </div>
           </Link>
           <Link to={cockpitHref}>
@@ -80,7 +79,7 @@ export function LandingPage() {
               variant="ghost"
               className="border-background/20 text-background hover:bg-background/10 hover:text-background"
             >
-              {isSignedIn ? 'Open cockpit' : 'Sign in'}
+              {isSignedIn ? 'Ouvrir le cockpit' : 'Se connecter'}
             </Button>
           </Link>
         </div>
@@ -90,22 +89,22 @@ export function LandingPage() {
         {/* Hero */}
         <section className="border-b border-alternate/50 bg-background">
           <div className="mx-auto max-w-5xl px-5 py-16 md:py-24">
-            <div className="text-micro text-primary/90">For founders with too many ideas</div>
+            <div className="text-micro text-primary/90">Pour les fondateurs avec trop d&apos;idées</div>
             <h1 className="mt-4 max-w-2xl text-balance text-4xl font-black tracking-tight text-midnight md:text-5xl lg:text-[3.25rem] lg:leading-[1.08]">
-              Turn idea chaos into strategic clarity.
+              Transformez le chaos d&apos;idées en clarté stratégique.
             </h1>
             <p className="mt-5 max-w-xl text-base leading-relaxed text-tertiary/80 md:text-lg">
-              A private cockpit to capture, score, connect, and review your business ideas — so you
-              know what to pursue, pause, or kill.
+              Un cockpit privé pour capturer, scorer, connecter et revoir vos idées business — pour savoir
+              quoi poursuivre, mettre en pause ou abandonner.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link to={cockpitHref}>
                 <Button size="lg" className="gap-2">
-                  Open your cockpit
+                  Ouvrir votre cockpit
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <span className="text-xs text-tertiary/55">Private · Google sign-in · Your data stays yours</span>
+              <span className="text-xs text-tertiary/55">Privé · Connexion Google · Vos données restent les vôtres</span>
             </div>
           </div>
         </section>
@@ -114,26 +113,26 @@ export function LandingPage() {
         <section className="mx-auto max-w-5xl px-5 py-14 md:py-16">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:items-center">
             <div>
-              <div className="text-micro text-tertiary/60">The objective</div>
+              <div className="text-micro text-tertiary/60">L&apos;objectif</div>
               <h2 className="mt-2 text-2xl font-black tracking-tight text-midnight md:text-3xl">
-                Stop juggling ideas in your head.
+                Arrêtez de jongler avec les idées dans votre tête.
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-tertiary/80 md:text-base">
-                You do not need another notes app. You need a place to{' '}
-                <span className="font-semibold text-midnight">rank</span>,{' '}
-                <span className="font-semibold text-midnight">compare</span>, and{' '}
-                <span className="font-semibold text-midnight">decide</span> — with scoring that
-                reflects <em>your</em> priorities, not a generic template.
+                Vous n&apos;avez pas besoin d&apos;une autre app de notes. Vous avez besoin d&apos;un endroit pour{' '}
+                <span className="font-semibold text-midnight">classer</span>,{' '}
+                <span className="font-semibold text-midnight">comparer</span> et{' '}
+                <span className="font-semibold text-midnight">décider</span> — avec un scoring qui
+                reflète <em>vos</em> priorités, pas un modèle générique.
               </p>
             </div>
             <Card className="border-primary/20 bg-primary/5 p-6">
               <div className="flex items-start gap-3">
                 <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-midnight" />
                 <div>
-                  <div className="text-sm font-bold text-midnight">Built for one founder</div>
+                  <div className="text-sm font-bold text-midnight">Conçu pour un fondateur</div>
                   <p className="mt-2 text-sm leading-relaxed text-tertiary/75">
-                    Start empty. Add ideas one by one. No demo clutter — a workspace you grow at your
-                    own pace.
+                    Commencez vide. Ajoutez les idées une par une. Pas de démo encombrante — un workspace
+                    que vous faites grandir à votre rythme.
                   </p>
                 </div>
               </div>
@@ -144,8 +143,8 @@ export function LandingPage() {
         {/* Steps */}
         <section className="border-y border-alternate/50 bg-background">
           <div className="mx-auto max-w-5xl px-5 py-14 md:py-16">
-            <div className="text-micro text-tertiary/60">How it works</div>
-            <h2 className="mt-2 text-2xl font-black tracking-tight text-midnight">Three steps. No friction.</h2>
+            <div className="text-micro text-tertiary/60">Comment ça marche</div>
+            <h2 className="mt-2 text-2xl font-black tracking-tight text-midnight">Trois étapes. Sans friction.</h2>
             <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
               {steps.map((s) => (
                 <Card key={s.n} className="relative p-6">
@@ -160,9 +159,9 @@ export function LandingPage() {
 
         {/* Pillars */}
         <section className="mx-auto max-w-5xl px-5 py-14 md:py-16">
-          <div className="text-micro text-tertiary/60">Inside the cockpit</div>
+          <div className="text-micro text-tertiary/60">Dans le cockpit</div>
           <h2 className="mt-2 text-2xl font-black tracking-tight text-midnight">
-            Read your portfolio like a strategist.
+            Lisez votre Portfolio comme un stratège.
           </h2>
           <div className="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {pillars.map(({ icon: Icon, title, body }) => (
@@ -186,14 +185,14 @@ export function LandingPage() {
         <section className="border-t border-alternate/50 bg-midnight text-background">
           <div className="mx-auto max-w-5xl px-5 py-14 text-center md:py-16">
             <h2 className="text-2xl font-black tracking-tight md:text-3xl">
-              Your next idea deserves a system.
+              Votre prochaine idée mérite un système.
             </h2>
             <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-background/65">
-              Capture your first idea in under a minute. The rest builds as you go.
+              Capturez votre première idée en moins d&apos;une minute. Le reste se construit au fil du temps.
             </p>
             <Link to={cockpitHref} className="mt-8 inline-block">
               <Button size="lg" className="gap-2">
-                {isSignedIn ? 'Back to cockpit' : 'Get started'}
+                {isSignedIn ? 'Retour au cockpit' : 'Commencer'}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -202,7 +201,7 @@ export function LandingPage() {
       </main>
 
       <footer className="border-t border-alternate/50 py-6 text-center text-micro text-tertiary/45">
-        NextStep Idea OS — private strategic workspace
+        NextStep Idea OS — workspace stratégique privé
       </footer>
     </div>
   )

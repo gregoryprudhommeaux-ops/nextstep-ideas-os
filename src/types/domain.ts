@@ -5,6 +5,7 @@ import type {
   ClarifyingQuestion,
   IdeaAIAnalysis,
   MarketResearchResult,
+  BusinessModelCanvasResult,
 } from './ai'
 
 export type Role = 'owner' | 'viewer'
@@ -140,6 +141,83 @@ export type Idea = WithTimestamps & {
   brainstormSessionId?: string
 
   marketResearch?: MarketResearchResult & { researchedAt: FirestoreTime }
+  /** Second-pass notes and AI refinements */
+  refinements?: IdeaRefinement[]
+  /** Latest Steven extrapolation session (replaced on each explore) */
+  latestExtrapolation?: IdeaExtrapolation
+  /** Exploration history — newest first */
+  extrapolations?: IdeaExtrapolation[]
+  /** Brainstorming chat with Steven on this idea */
+  brainstormThread?: IdeaBrainstormMessage[]
+  /** Interactive Business Model Canvas */
+  businessModelCanvas?: BusinessModelCanvasResult & {
+    generatedAt: FirestoreTime
+    provider: AIProvider
+  }
+}
+
+export type IdeaBrainstormMessage = WithTimestamps & {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+  provider?: AIProvider
+}
+
+export type IdeaRefinement = WithTimestamps & {
+  id: string
+  notes: string
+  stevenSummary?: string
+  changeSummary?: string[]
+  provider?: AIProvider
+  /** @deprecated legacy multi-field refinements */
+  dealNotes?: string
+  businessNotes?: string
+  marketVision?: string
+  possibilities?: string
+}
+
+export type ExtrapolationTriage = 'explore_now' | 'later' | 'off_focus'
+
+export type ExtrapolationMode = 'expand' | 'challenge' | 'focus'
+
+export type ExtrapolationAmbition =
+  | 'quick_test'
+  | 'side_business'
+  | 'main_business'
+  | 'platform'
+
+export type IdeaExtrapolationProposal = {
+  id: string
+  title: string
+  oneLiner?: string
+  rationale: string
+  triage: ExtrapolationTriage
+  triageReason: string
+  relatedIdeaIds?: string[]
+  userNotes?: string
+  status: 'open' | 'converted' | 'dismissed'
+  resultIdeaId?: string
+}
+
+export type IdeaExtrapolation = WithTimestamps & {
+  id: string
+  mode: ExtrapolationMode
+  preserveInput: string
+  avoidInput: string
+  ambition: ExtrapolationAmbition
+  reformulation: string
+  coreToPreserve: string
+  corePromise?: string
+  criticalNotes: string[]
+  weaknesses: string[]
+  hypothesesToTest?: string[]
+  tightenedIdea: string
+  priorityDirections: string[]
+  mistakesToAvoid: string[]
+  strategicQuestion: string
+  complementProposals: IdeaExtrapolationProposal[]
+  portfolioLinkProposals: IdeaExtrapolationProposal[]
+  provider?: AIProvider
 }
 
 export type FilterDefinition = WithTimestamps & {
@@ -299,5 +377,64 @@ export type SharedBase = WithTimestamps & {
   sharedDimensions: ('audience' | 'infra' | 'brand' | 'backOffice' | 'channels')[]
   aiSuggested: boolean
   confirmedByUser: boolean
+}
+
+export type PortfolioSuggestionStatus = 'open' | 'applied' | 'dismissed' | 'converted'
+
+export type PortfolioSynergySuggestion = {
+  id: string
+  sourceIdeaId: string
+  targetIdeaId: string
+  note: string
+  score: number
+  userNotes?: string
+  status: PortfolioSuggestionStatus
+  resultLinkId?: string
+}
+
+export type PortfolioUmbrellaSuggestion = {
+  id: string
+  name: string
+  ideaIds: string[]
+  note: string
+  userNotes?: string
+  status: PortfolioSuggestionStatus
+  resultUmbrellaId?: string
+  resultIdeaId?: string
+}
+
+export type PortfolioSharedBaseSuggestion = {
+  id: string
+  name: string
+  ideaIds: string[]
+  dimensions: SharedBase['sharedDimensions']
+  note: string
+  userNotes?: string
+  status: PortfolioSuggestionStatus
+  resultSharedBaseId?: string
+  resultIdeaId?: string
+}
+
+export type PortfolioNewIdeaSuggestion = {
+  id: string
+  title: string
+  oneLiner?: string
+  description?: string
+  rationale: string
+  relatedIdeaIds?: string[]
+  userNotes?: string
+  status: PortfolioSuggestionStatus
+  resultIdeaId?: string
+}
+
+export type PortfolioGlobalAnalysis = WithTimestamps & {
+  id: string
+  summary: string
+  ecosystemNote?: string
+  userNotes?: string
+  suggestedSynergies: PortfolioSynergySuggestion[]
+  umbrellaCandidates: PortfolioUmbrellaSuggestion[]
+  sharedBases: PortfolioSharedBaseSuggestion[]
+  newIdeaProposals: PortfolioNewIdeaSuggestion[]
 }
 

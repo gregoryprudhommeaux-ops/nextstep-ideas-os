@@ -9,70 +9,70 @@ export type DimensionMeta = {
 
 export const dimensionMeta: Record<ScoreDimension, DimensionMeta> = {
   personalAlignment: {
-    label: 'Personal alignment',
+    label: 'Alignement personnel',
     shortLabel: 'Align',
     kind: 'positive',
-    description: 'How well the idea fits your values and trajectory.',
+    description: 'Adéquation avec tes valeurs et ta trajectoire.',
   },
   freedomFit: {
     label: 'Freedom',
     shortLabel: 'Freedom',
     kind: 'positive',
-    description: 'Autonomy and time ownership potential.',
+    description: 'Potentiel d’autonomie et de maîtrise du temps.',
   },
   remoteFit: {
     label: 'Remote fit',
     shortLabel: 'Remote',
     kind: 'positive',
-    description: 'Compatibility with remote-first execution.',
+    description: 'Compatibilité avec une exécution remote-first.',
   },
   scalabilityFit: {
     label: 'Scalability',
     shortLabel: 'Scale',
     kind: 'positive',
-    description: 'Ability to grow without linear time input.',
+    description: 'Capacité à grandir sans effort linéaire.',
   },
   sideBusinessFit: {
     label: 'Side business',
     shortLabel: 'Side',
     kind: 'boolean',
-    description: 'Can start while protecting bandwidth.',
+    description: 'Peut démarrer sans saturer ta bande passante.',
   },
   revenuePotential: {
     label: 'Revenue potential',
     shortLabel: 'Revenue',
     kind: 'positive',
-    description: 'Upside for meaningful income or asset value.',
+    description: 'Potentiel de revenus ou de valeur d’actif.',
   },
   speedToValidation: {
     label: 'Validation speed',
     shortLabel: 'Speed',
     kind: 'positive',
-    description: 'How quickly you can test core assumptions.',
+    description: 'Rapidité pour tester les hypothèses clés.',
   },
   ecosystemFit: {
     label: 'Ecosystem fit',
     shortLabel: 'Ecosystem',
     kind: 'positive',
-    description: 'Compounds with existing skills and assets.',
+    description: 'Effet de levier avec tes compétences et actifs existants.',
   },
   excitementLevel: {
     label: 'Excitement',
     shortLabel: 'Excite',
     kind: 'positive',
-    description: 'Emotional pull and sustained motivation.',
+    description: 'Motivation et énergie sur la durée.',
   },
   complexityLevel: {
     label: 'Complexity',
     shortLabel: 'Complex',
     kind: 'penalty',
-    description: 'Operational and cognitive load (penalty).',
+    description: 'Charge opérationnelle et cognitive (pénalité).',
   },
   capitalIntensity: {
     label: 'Capital intensity',
     shortLabel: 'Capex',
     kind: 'penalty',
-    description: 'Upfront capital required (penalty).',
+    description: 'Capital initial requis (pénalité).',
   },
 }
 

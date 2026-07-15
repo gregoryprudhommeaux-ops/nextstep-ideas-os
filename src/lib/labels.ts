@@ -2,15 +2,15 @@ import type { IdeaCategory, IdeaStatus, HorizonType } from '../types/domain'
 
 export const categoryLabels: Record<IdeaCategory, string> = {
   service: 'Service',
-  productizedService: 'Productized service',
+  productizedService: 'Service productisé',
   saasAi: 'SaaS / AI',
-  communityPlatform: 'Community',
+  communityPlatform: 'Communauté / plateforme',
   hospitality: 'Hospitality',
   mediaBrand: 'Media brand',
   consulting: 'Consulting',
   marketplace: 'Marketplace',
-  digitalAsset: 'Digital asset',
-  localPhysical: 'Local physical',
+  digitalAsset: 'Actif digital',
+  localPhysical: 'Local / physique',
 }
 
 export const statusLabels: Record<IdeaStatus, string> = {
@@ -22,8 +22,8 @@ export const statusLabels: Record<IdeaStatus, string> = {
 }
 
 export const horizonLabels: Record<HorizonType, string> = {
-  '0_30d': '0–30 days',
-  '30_90d': '30–90 days',
-  '3_12m': '3–12 months',
-  '1_3y': '1–3 years',
+  '0_30d': '0–30 jours',
+  '30_90d': '30–90 jours',
+  '3_12m': '3–12 mois',
+  '1_3y': '1–3 ans',
 }

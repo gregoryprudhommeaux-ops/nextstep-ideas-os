@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import type { AIProvider, AISettings } from '../../types/ai'
+import type { AIProvider, AISettings, AITaskRole } from '../../types/ai'
 import { DEFAULT_AI_SETTINGS } from '../../types/ai'
 import { loadAISettings, saveAISettings } from './keyStorage'
 import { isAIAvailable as checkAvailable } from './router'
@@ -51,13 +51,16 @@ export function useAISettings() {
   const testConnection = useCallback(
     async (provider: AIProvider, apiKey: string) => {
       const result = await testProvider(provider, apiKey)
+      const defaultKey = settings.providers[settings.defaultAnalysisProvider]?.apiKey?.trim()
       const next: AISettings = {
         ...settings,
+        defaultAnalysisProvider:
+          result.ok && !defaultKey ? provider : settings.defaultAnalysisProvider,
         providers: {
           ...settings.providers,
           [provider]: {
             apiKey,
-            enabled: result.ok,
+            enabled: true,
             lastTestedAt: Date.now(),
             lastTestStatus: result.ok ? 'ok' : 'error',
           },
@@ -69,13 +72,42 @@ export function useAISettings() {
     [settings, save]
   )
 
+  const saveProviderKey = useCallback(
+    async (provider: AIProvider, apiKey: string) => {
+      const trimmed = apiKey.trim()
+      if (!trimmed) return
+      const defaultKey = settings.providers[settings.defaultAnalysisProvider]?.apiKey?.trim()
+      const next: AISettings = {
+        ...settings,
+        defaultAnalysisProvider: !defaultKey ? provider : settings.defaultAnalysisProvider,
+        providers: {
+          ...settings.providers,
+          [provider]: {
+            apiKey: trimmed,
+            enabled: true,
+            lastTestedAt: Date.now(),
+          },
+        },
+      }
+      await save(next)
+    },
+    [settings, save]
+  )
+
+  const isTaskAvailable = useCallback(
+    (task: AITaskRole) => checkAvailable(settings, task),
+    [settings]
+  )
+
   return {
     settings,
     save,
     updateProvider,
     testConnection,
+    saveProviderKey,
     loaded,
     isAvailable: checkAvailable(settings),
+    isTaskAvailable,
     userId,
   }
 }

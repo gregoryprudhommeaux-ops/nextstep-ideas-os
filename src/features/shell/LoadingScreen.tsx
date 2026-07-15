@@ -9,7 +9,7 @@ export function LoadingScreen() {
               <div className="text-sm font-black tracking-tight text-midnight">
                 NextStep Idea OS
               </div>
-              <div className="text-micro text-tertiary/60">Initializing</div>
+              <div className="text-micro text-tertiary/60">Initialisation</div>
             </div>
           </div>
           <div className="mt-6 h-1.5 w-full overflow-hidden rounded-full bg-alternate/50">

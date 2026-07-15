@@ -10,7 +10,7 @@ export function ScorePill({ score }: { score: number }) {
         'inline-flex h-7 items-center rounded-full border px-2.5 text-xs font-bold tabular-nums',
         tone
       )}
-      title="Weighted score (0–100)"
+      title="Score pondéré (0–100)"
     >
       {score}
     </span>

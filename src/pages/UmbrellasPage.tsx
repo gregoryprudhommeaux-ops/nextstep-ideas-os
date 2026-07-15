@@ -34,17 +34,17 @@ export function UmbrellasPage() {
   return (
     <div className="space-y-8">
       <SectionHeader
-        eyebrow="Brand families"
-        title="Umbrella groups"
-        description="Cluster ideas under shared brand logic. Cohesion scores surface fit — tension notes flag dilution risk."
+        eyebrow="Familles de marque"
+        title="Groupes Umbrella"
+        description="Regroupez les idées sous une logique de marque commune. Les scores de cohésion révèlent le fit — les notes de tension signalent un risque de dilution."
       />
 
       <CreateUmbrellaForm />
 
       {groups.length === 0 ? (
         <EmptyState
-          title="No umbrella groups yet"
-          description="Cluster related ideas under a shared brand logic when you're ready."
+          title="Aucun groupe Umbrella pour l'instant"
+          description="Regroupez les idées liées sous une logique de marque commune quand vous êtes prêt."
         />
       ) : null}
 
@@ -58,7 +58,7 @@ export function UmbrellasPage() {
               </div>
               {g.cohesionScore != null ? (
                 <div className="text-right">
-                  <div className="text-micro text-tertiary/55">Cohesion</div>
+                  <div className="text-micro text-tertiary/55">Cohésion</div>
                   <div className="text-2xl font-black tabular-nums text-midnight">{g.cohesionScore}</div>
                 </div>
               ) : null}
@@ -79,7 +79,7 @@ export function UmbrellasPage() {
             ) : null}
 
             <div className="mt-5">
-              <div className="text-micro text-tertiary/55">Ideas in group</div>
+              <div className="text-micro text-tertiary/55">Idées du groupe</div>
               <div className="mt-2 space-y-2">
                 {g.ideaIds.map((id) => (
                   <GroupIdeaRow key={id} ideaId={id} />
@@ -103,9 +103,9 @@ export function UmbrellasPage() {
 
       {ungrouped.length > 0 ? (
         <Card className="p-6">
-          <div className="text-micro text-tertiary/60">Ungrouped ideas</div>
+          <div className="text-micro text-tertiary/60">Idées non regroupées</div>
           <p className="mt-2 text-xs text-tertiary/65">
-            Ideas not yet assigned to an umbrella — candidates for new brand families.
+            Idées pas encore assignées à un Umbrella — candidates pour de nouvelles familles de marque.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             {ungrouped.map((i) => (

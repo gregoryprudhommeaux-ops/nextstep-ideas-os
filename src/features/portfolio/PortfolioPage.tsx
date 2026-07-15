@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles } from 'lucide-react'
 import { SectionHeader } from '../../components/SectionHeader'
 import { Card } from '../../components/ui/Card'
@@ -12,11 +12,12 @@ import {
   EMPTY_SHARED_BASES,
 } from '../../app/store'
 import { statusLabels } from '../../lib/labels'
-import { groupExtensions, getStandaloneIdeas, ideaTitleById } from './portfolioUtils'
+import { groupExtensions, getStandaloneIdeas, ideaTitleById, ideaExists } from './portfolioUtils'
 import { usePortfolioScan } from './usePortfolioScan'
-import { PortfolioScanPanel } from './PortfolioScanPanel'
+import { usePortfolioScoreRefresh } from '../ideas/usePortfolioScoreRefresh'
 import { SynergyStrengthBadge } from '../../components/SynergyStrengthBadge'
 import { getPartnerId } from '../synergy/synergyUtils'
+import { StrategicFitMatrix } from '../ideas/StrategicFitMatrix'
 
 function IdeaRow({ idea }: { idea: { id: string; title: string; oneLiner?: string; status: string } }) {
   return (
@@ -36,6 +37,7 @@ function IdeaRow({ idea }: { idea: { id: string; title: string; oneLiner?: strin
 }
 
 export function PortfolioPage() {
+  const navigate = useNavigate()
   const ideas = useAppStore((s) => s.data?.ideas ?? EMPTY_IDEAS)
   const synergyLinks = useAppStore((s) => s.data?.synergyLinks ?? EMPTY_SYNERGY_LINKS)
   const umbrellaGroups = useAppStore((s) => s.data?.umbrellaGroups ?? EMPTY_UMBRELLA_GROUPS)
@@ -43,7 +45,13 @@ export function PortfolioPage() {
 
   const standalone = getStandaloneIdeas(ideas)
   const extensionGroups = groupExtensions(ideas)
-  const { result, loading, error, scan, clear, isAvailable, loaded } = usePortfolioScan()
+  const { loading, error, scan, isAvailable, loaded } = usePortfolioScan()
+  const scoreRefresh = usePortfolioScoreRefresh()
+
+  const handleScan = async () => {
+    const id = await scan()
+    if (id) navigate(`/app/portfolio/analysis/${id}`)
+  }
 
   const variantCount = ideas.filter((i) => i.portfolioRole === 'variant').length
 
@@ -67,8 +75,13 @@ export function PortfolioPage() {
                 </Button>
               </Link>
             ) : null}
+            <Link to="/app/portfolio/analysis">
+              <Button type="button" variant="ghost">
+                Analyse globale
+              </Button>
+            </Link>
             {isAvailable && ideas.length >= 2 ? (
-              <Button type="button" disabled={loading} onClick={() => void scan()}>
+              <Button type="button" disabled={loading} onClick={() => void handleScan()}>
                 <Sparkles className="h-4 w-4" />
                 {loading ? 'Analyse…' : 'Scanner avec Steven'}
               </Button>
@@ -83,7 +96,48 @@ export function PortfolioPage() {
         <Card className="border-red-300/60 bg-red-50/80 p-4 text-sm text-red-900">{error}</Card>
       ) : null}
 
-      {result ? <PortfolioScanPanel result={result} onDismiss={clear} /> : null}
+      {scoreRefresh.error ? (
+        <Card className="border-red-300/60 bg-red-50/80 p-4 text-sm text-red-900">
+          {scoreRefresh.error}
+        </Card>
+      ) : null}
+
+      {ideas.length > 0 && scoreRefresh.isAvailable && scoreRefresh.placeholderCount > 0 ? (
+        <Card className="border-primary/25 bg-primary/5 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold text-midnight">Scores strategic fit</div>
+              <p className="mt-1 text-xs text-tertiary/70">
+                {scoreRefresh.placeholderCount} idée
+                {scoreRefresh.placeholderCount > 1 ? 's' : ''} encore à 5/10 partout — Steven peut
+                recalibrer l&apos;analyse sur tout le portfolio.
+              </p>
+              {scoreRefresh.progress ? (
+                <p className="mt-2 text-xs text-tertiary/60">
+                  {scoreRefresh.progress.done}/{scoreRefresh.progress.total} analysées…
+                </p>
+              ) : null}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={scoreRefresh.loading}
+                onClick={() => void scoreRefresh.refresh('placeholder')}
+              >
+                {scoreRefresh.loading ? 'Analyse…' : 'Mettre à jour les scores'}
+              </Button>
+              <Button
+                type="button"
+                disabled={scoreRefresh.loading}
+                onClick={() => void scoreRefresh.refresh('all')}
+              >
+                Tout re-scorer
+              </Button>
+            </div>
+          </div>
+        </Card>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="p-4">
@@ -103,6 +157,8 @@ export function PortfolioPage() {
           <div className="text-sm text-tertiary/70">Socles mutualisés</div>
         </Card>
       </div>
+
+      {ideas.length > 0 ? <StrategicFitMatrix ideas={ideas} scoreRefresh={scoreRefresh} /> : null}
 
       {ideas.length === 0 ? (
         <Card className="p-6 text-center text-sm text-tertiary/70">
@@ -130,12 +186,16 @@ export function PortfolioPage() {
               <h2 className="text-sm font-bold text-midnight">Extensions par idée parente</h2>
               {extensionGroups.map((group) => (
                 <Card key={group.parentId} className="space-y-3 p-4">
-                  <Link
-                    to={`/app/ideas/${group.parentId}`}
-                    className="text-sm font-semibold text-midnight underline-offset-2 hover:underline"
-                  >
-                    {group.parentTitle}
-                  </Link>
+                  {ideaExists(ideas, group.parentId) ? (
+                    <Link
+                      to={`/app/ideas/${group.parentId}`}
+                      className="text-sm font-semibold text-midnight underline-offset-2 hover:underline"
+                    >
+                      {group.parentTitle}
+                    </Link>
+                  ) : (
+                    <div className="text-sm font-semibold text-tertiary/70">{group.parentTitle}</div>
+                  )}
                   <div className="grid gap-2 sm:grid-cols-2">
                     {group.extensions.map((ext) => (
                       <IdeaRow key={ext.id} idea={ext} />

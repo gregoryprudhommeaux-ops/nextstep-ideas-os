@@ -6,6 +6,7 @@ import { getFirebaseServices } from '../../services/firebase/firebase'
 import { allowedEmails } from './allowedEmails'
 import { AuthContext, type AuthState } from './AuthContext'
 import { useAppStore } from '../../app/store'
+import { authErrorMessage } from './authErrors'
 
 const initialState: AuthState = isFirebaseConfigured()
   ? { user: null, isLoading: true, isAuthorized: false, email: null, configError: undefined }
@@ -26,28 +27,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!isFirebaseConfigured()) return
 
     const auth = getFirebaseServices().auth
+    let unsubscribe: (() => void) | undefined
 
-    // Do not block auth listener on persistence — setPersistence can hang in some browsers.
-    void initAuthPersistence().catch(() => {})
-    void completeGoogleRedirectSignIn().catch(() => {})
-
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      const uid = user?.uid ?? null
-      const prevUid = lastUidRef.current
-      // Only reset on logout or account switch — not on first session attach (null → uid)
-      if (prevUid !== null && prevUid !== uid) {
-        useAppStore.getState().resetWorkspace()
+    void (async () => {
+      try {
+        await initAuthPersistence()
+        await completeGoogleRedirectSignIn()
+      } catch (error) {
+        setState((s) => ({
+          ...s,
+          isLoading: false,
+          redirectError: authErrorMessage(error),
+        }))
       }
-      lastUidRef.current = uid
 
-      const email = (user?.email ?? '').toLowerCase() || null
-      const isAuthorized = email ? allowedEmails.has(email) : false
-      setState({ user, isLoading: false, isAuthorized, email, configError: undefined })
-    })
+      unsubscribe = onAuthStateChanged(auth, (user) => {
+        const uid = user?.uid ?? null
+        const prevUid = lastUidRef.current
+        if (prevUid !== null && prevUid !== uid) {
+          useAppStore.getState().resetWorkspace()
+        }
+        lastUidRef.current = uid
 
-    return () => unsubscribe()
+        const email = (user?.email ?? '').toLowerCase() || null
+        const isAuthorized = email ? allowedEmails.has(email) : false
+        setState({
+          user,
+          isLoading: false,
+          isAuthorized,
+          email,
+          configError: undefined,
+          redirectError: undefined,
+        })
+      })
+    })()
+
+    return () => unsubscribe?.()
   }, [])
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>
 }
-

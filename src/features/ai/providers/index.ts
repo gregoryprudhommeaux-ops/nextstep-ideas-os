@@ -12,11 +12,20 @@ export async function providerChat(
   apiKey: string,
   messages: ChatMessage[]
 ): Promise<string> {
+  return providerChatText(provider, apiKey, messages, true)
+}
+
+export async function providerChatText(
+  provider: AIProvider,
+  apiKey: string,
+  messages: ChatMessage[],
+  jsonMode = false
+): Promise<string> {
   switch (provider) {
     case 'openai':
-      return openaiChat(apiKey, messages)
+      return openaiChat(apiKey, messages, jsonMode)
     case 'google':
-      return geminiChat(apiKey, messages)
+      return geminiChat(apiKey, messages, jsonMode)
     case 'perplexity':
       return perplexityChat(apiKey, messages)
     case 'anthropic':

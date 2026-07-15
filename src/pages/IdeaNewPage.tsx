@@ -21,7 +21,7 @@ export function IdeaNewPage() {
   const addIdea = useAppStore((s) => s.addIdea)
   const [title, setTitle] = React.useState('')
   const [description, setDescription] = React.useState('')
-  const [category, setCategory] = React.useState<IdeaCategory>('saasAi')
+  const [category, setCategory] = React.useState<IdeaCategory>('service')
   const [status, setStatus] = React.useState<IdeaStatus>('inbox')
   const [horizon, setHorizon] = React.useState<HorizonType>('3_12m')
   const [inspirations, setInspirations] = React.useState<IdeaInspiration[]>([])
@@ -36,33 +36,33 @@ export function IdeaNewPage() {
   return (
     <div className="mx-auto max-w-xl space-y-6">
       <SectionHeader
-        eyebrow="Step 1"
-        title="Capture an idea"
-        description="Capture the core idea, then attach what inspired it — links, decks, chats, voice notes."
+        eyebrow="Étape 1"
+        title="Capturer une idée"
+        description="Saisis l'idée de base, puis attache ce qui l'a inspirée — liens, decks, chats, notes vocales."
       />
 
       <Card className="p-6">
         <form onSubmit={handleSubmit} className="space-y-4">
-          <Field label="Title" hint="Short, decisive name">
+          <Field label="Titre" hint="Nom court et décisif">
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="e.g. Local founder newsletter"
+              placeholder="ex. Newsletter locale pour fondateurs"
               autoFocus
               required
             />
           </Field>
 
-          <Field label="Description" hint="One paragraph — what is it?">
+          <Field label="Description" hint="Un paragraphe — de quoi s'agit-il ?">
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="What problem does this solve?"
+              placeholder="Quel problème cela résout-il ?"
             />
           </Field>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Field label="Category">
+            <Field label="Catégorie">
               <Select value={category} onChange={(e) => setCategory(e.target.value as IdeaCategory)}>
                 {categories.map((c) => (
                   <option key={c} value={c}>
@@ -71,7 +71,7 @@ export function IdeaNewPage() {
                 ))}
               </Select>
             </Field>
-            <Field label="Status">
+            <Field label="Statut">
               <Select value={status} onChange={(e) => setStatus(e.target.value as IdeaStatus)}>
                 {statuses.map((s) => (
                   <option key={s} value={s}>
@@ -93,8 +93,8 @@ export function IdeaNewPage() {
 
           <div className="border-t border-alternate/50 pt-4">
             <Field
-              label="What inspired this?"
-              hint="Websites, Google Slides, PDFs, chat excerpts, screenshot links, or voice note URLs."
+              label="Qu'est-ce qui a inspiré l'idée ?"
+              hint="Sites web, Google Slides, PDF, extraits de chat, liens de captures d'écran ou notes vocales."
             >
               <InspirationEditor value={inspirations} onChange={setInspirations} />
             </Field>
@@ -102,11 +102,11 @@ export function IdeaNewPage() {
 
           <div className="flex flex-wrap gap-2 pt-2">
             <Button type="submit" disabled={!title.trim()}>
-              Save & continue
+              Enregistrer et continuer
             </Button>
             <Link to="/app/ideas">
               <Button type="button" variant="ghost">
-                Cancel
+                Annuler
               </Button>
             </Link>
           </div>

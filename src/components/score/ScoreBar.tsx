@@ -4,18 +4,28 @@ export function ScoreBar({ value, label, kind = 'positive' }: { value: number; l
   const pct = Math.max(0, Math.min(100, value))
   return (
     <div>
-      <div className="flex items-center justify-between gap-2">
-        <span className="text-xs text-tertiary/70">{label}</span>
-        <span className="text-xs font-semibold tabular-nums text-midnight">{value}</span>
-      </div>
-      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-alternate/40">
-        <div
-          className={cn(
-            'h-full rounded-full transition-all',
-            kind === 'penalty' ? 'bg-tertiary/50' : pct >= 70 ? 'bg-primary' : 'bg-secondary/70'
-          )}
-          style={{ width: `${pct}%` }}
-        />
+      {label ? (
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs text-tertiary/70">{label}</span>
+          <span className="text-xs font-semibold tabular-nums text-midnight">{value}</span>
+        </div>
+      ) : null}
+      <div className={label ? 'mt-1.5' : ''}>
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-alternate/50">
+          <div
+            className={cn(
+              'h-full rounded-full transition-all',
+              kind === 'penalty'
+                ? 'bg-tertiary/60'
+                : pct >= 70
+                  ? 'bg-primary'
+                  : pct >= 40
+                    ? 'bg-secondary/80'
+                    : 'bg-tertiary/45'
+            )}
+            style={{ width: `${pct}%` }}
+          />
+        </div>
       </div>
     </div>
   )

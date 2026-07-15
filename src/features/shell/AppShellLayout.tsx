@@ -1,7 +1,6 @@
-import { LogOut, Settings } from 'lucide-react'
+import { LogOut } from 'lucide-react'
 import { Link, Outlet } from 'react-router-dom'
 import { useAppStore } from '../../app/store'
-import { ProfileSwitcher } from '../../components/ProfileSwitcher'
 import { Button } from '../../components/ui/Button'
 import { signOutUser } from '../../services/firebase/auth'
 import { AppSidebar, MobileBottomNav } from './AppSidebar'
@@ -33,27 +32,18 @@ export function AppShellLayout() {
               <span className="text-sm font-black text-midnight">NextStep</span>
             </Link>
           </div>
-          <ProfileSwitcher variant="inline" />
-          <Link
-            to="/app/settings"
-            className="flex h-9 w-9 items-center justify-center rounded-[--radius-sharp] border border-alternate/60 text-midnight transition hover:border-alternate hover:bg-mineral"
-            aria-label="Settings"
-            title="Settings — Steven"
-          >
-            <Settings className="h-4 w-4" />
-          </Link>
           <Button
             variant="ghost"
             className="h-9 px-2 sm:px-3"
             onClick={handleSignOut}
-            aria-label="Sign out"
+            aria-label="Déconnexion"
           >
             <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Sign out</span>
+            <span className="hidden sm:inline">Déconnexion</span>
           </Button>
         </header>
 
-        <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6 pb-24 sm:px-5 sm:py-8 md:max-w-4xl md:pb-8 lg:max-w-5xl">
+        <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6 pb-[calc(5.25rem+env(safe-area-inset-bottom))] sm:px-5 sm:py-8 md:max-w-4xl md:pb-8 lg:max-w-5xl">
           <Outlet />
         </main>
 

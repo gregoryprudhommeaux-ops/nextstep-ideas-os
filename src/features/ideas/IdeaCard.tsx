@@ -41,9 +41,9 @@ export function IdeaCard({ idea }: { idea: Idea }) {
 
       <div className={cn('flex flex-wrap gap-1', compact ? 'mt-2' : 'mt-3')}>
         <SignalBadge label="Freedom" value={idea.freedomFit} />
-        <SignalBadge label="Remote" value={idea.remoteFit} />
-        <SignalBadge label="Speed" value={idea.speedToValidation} />
-        <SignalBadge label="Scale" value={idea.scalabilityFit} />
+        <SignalBadge label="Remote fit" value={idea.remoteFit} />
+        <SignalBadge label="Validation speed" value={idea.speedToValidation} />
+        <SignalBadge label="Scalability" value={idea.scalabilityFit} />
       </div>
 
       {!compact && idea.tagIds.length > 0 ? (

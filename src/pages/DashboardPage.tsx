@@ -1,11 +1,10 @@
 import { Link } from 'react-router-dom'
 import { Card } from '../components/ui/Card'
 import { Button } from '../components/ui/Button'
-import { useActiveProfile, useAppStore, useRankedIdeas, EMPTY_IDEAS, EMPTY_SYNERGY_LINKS, EMPTY_WEEKLY_REVIEWS } from '../app/store'
+import { useActiveProfile, useAppStore, useRankedIdeas, EMPTY_IDEAS, EMPTY_SYNERGY_LINKS } from '../app/store'
 import { SectionHeader } from '../components/SectionHeader'
 import { StatCard } from '../components/StatCard'
 import { IdeaLinkRow } from '../components/IdeaLinkRow'
-import { getProfileExplanation } from '../features/scoring/profileInsights'
 import { statusLabels } from '../lib/labels'
 import type { Idea } from '../types/domain'
 import { getMostConnectedIdeas } from '../features/synergy/synergyUtils'
@@ -23,31 +22,28 @@ export function DashboardPage() {
   const ranked = useRankedIdeas()
   const ideas = useAppStore((s) => s.data?.ideas ?? EMPTY_IDEAS)
   const synergyLinks = useAppStore((s) => s.data?.synergyLinks ?? EMPTY_SYNERGY_LINKS)
-  const latestReview = useAppStore((s) => {
-    const reviews = s.data?.weeklyReviews ?? EMPTY_WEEKLY_REVIEWS
-    return [...reviews].sort((a, b) => b.weekLabel.localeCompare(a.weekLabel))[0] ?? null
-  })
 
   const mostConnected = getMostConnectedIdeas(ideas, synergyLinks, 5)
 
   const total = ideas.length
+  const activeIdeas = ideas.filter((i) => i.status !== 'archive')
   const byStatus = ideas.reduce<Record<string, number>>((acc, i) => {
     acc[i.status] = (acc[i.status] ?? 0) + 1
     return acc
   }, {})
 
-  const top5 = ranked.slice(0, 5)
-  const highAlignment = [...ideas]
+  const top5 = ranked.filter((i) => i.status !== 'archive').slice(0, 5)
+  const highAlignment = [...activeIdeas]
     .sort((a, b) => b.personalAlignment - a.personalAlignment)
     .slice(0, 5)
-  const quickTests = [...ideas]
+  const quickTests = [...activeIdeas]
     .filter((i) => i.complexityLevel <= 4 && i.speedToValidation >= 7)
     .sort((a, b) => b.speedToValidation - a.speedToValidation)
     .slice(0, 5)
   const attention = profile
-    ? ideas.filter((i) => needsAttention(i, profile)).slice(0, 5)
+    ? activeIdeas.filter((i) => needsAttention(i, profile)).slice(0, 5)
     : []
-  const needingValidation = ideas
+  const needingValidation = activeIdeas
     .filter((i) => i.status === 'explore' || i.status === 'validate')
     .slice(0, 5)
 
@@ -55,28 +51,28 @@ export function DashboardPage() {
     return (
       <div className="space-y-8">
         <SectionHeader
-          eyebrow="Welcome"
-          title="Your strategic cockpit"
-          description="Start light. Capture one idea, score it subjectively, then grow your portfolio week by week."
+          eyebrow="Bienvenue"
+          title="Votre cockpit stratégique"
+          description="Commencez léger. Capturez une idée, scorez-la subjectivement, puis faites grandir votre Portfolio semaine après semaine."
         />
         <Card className="border-primary/25 bg-primary/5 p-8">
-          <div className="text-micro text-tertiary/60">Getting started</div>
+          <div className="text-micro text-tertiary/60">Pour démarrer</div>
           <ol className="mt-4 space-y-3 text-sm leading-relaxed text-tertiary/80">
             <li>
-              <span className="font-semibold text-midnight">1.</span> Capture an idea (title + short
+              <span className="font-semibold text-midnight">1.</span> Capturez une idée (titre + courte
               description)
             </li>
             <li>
-              <span className="font-semibold text-midnight">2.</span> Complete the strategic brief
-              and tune your scores
+              <span className="font-semibold text-midnight">2.</span> Complétez le brief stratégique
+              et ajustez vos scores
             </li>
             <li>
-              <span className="font-semibold text-midnight">3.</span> Link ideas, group umbrellas,
-              run a weekly review
+              <span className="font-semibold text-midnight">3.</span> Reliez les idées, explorez les synergies
+              et regroupez les Umbrellas
             </li>
           </ol>
           <Link to="/app/ideas/new" className="mt-6 inline-block">
-            <Button size="lg">Capture my first idea</Button>
+            <Button size="lg">Capturer ma première idée</Button>
           </Link>
         </Card>
       </div>
@@ -86,33 +82,13 @@ export function DashboardPage() {
   return (
     <div className="space-y-8">
       <SectionHeader
-        eyebrow="Portfolio snapshot"
+        eyebrow="Aperçu Portfolio"
         title="Dashboard"
-        description="Read your idea portfolio through the active scoring lens. Switch profiles to change what rises."
+        description="Vue d’ensemble de ton Portfolio — idées, tensions et prochaines actions."
       />
 
-      {profile ? (
-        <Card className="border-primary/25 bg-primary/5 p-5">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div className="max-w-prose">
-              <div className="text-micro text-tertiary/60">Active scoring lens</div>
-              <div className="mt-1 text-lg font-black tracking-tight text-midnight">{profile.name}</div>
-              <p className="mt-2 text-sm leading-relaxed text-tertiary/75">
-                {getProfileExplanation(profile)}
-              </p>
-            </div>
-            <Link
-              to="/app/filters"
-              className="text-micro text-tertiary/70 underline-offset-2 hover:text-tertiary hover:underline"
-            >
-              View all profiles →
-            </Link>
-          </div>
-        </Card>
-      ) : null}
-
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-        <StatCard label="Total ideas" value={total} accent />
+        <StatCard label="Total idées" value={total} accent />
         {(Object.keys(statusLabels) as (keyof typeof statusLabels)[]).map((status) => (
           <StatCard
             key={status}
@@ -125,9 +101,9 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Card className="p-5">
           <div className="flex items-baseline justify-between gap-3">
-            <div className="text-micro text-tertiary/60">Top ranked</div>
+            <div className="text-micro text-tertiary/60">Top classé</div>
             <Link to="/app/ideas" className="text-micro text-tertiary/60 hover:text-tertiary">
-              View board →
+              Voir le board →
             </Link>
           </div>
           <div className="mt-4 space-y-1">
@@ -138,15 +114,15 @@ export function DashboardPage() {
         </Card>
 
         <Card className="p-5">
-          <div className="text-micro text-tertiary/60">Needs attention</div>
+          <div className="text-micro text-tertiary/60">À surveiller</div>
           <p className="mt-1 text-xs text-tertiary/60">
-            High upside ideas with weak fit under the current lens.
+            Idées à fort potentiel avec un score global faible ou un alignement personnel limité.
           </p>
           <div className="mt-4 space-y-1">
             {attention.length ? (
-              attention.map((i) => <IdeaLinkRow key={i.id} idea={i} meta="Review strategic tension" />)
+              attention.map((i) => <IdeaLinkRow key={i.id} idea={i} meta="Revoir la tension stratégique" />)
             ) : (
-              <div className="text-xs text-tertiary/55">No critical tensions flagged.</div>
+              <div className="text-xs text-tertiary/55">Aucune tension critique signalée.</div>
             )}
           </div>
         </Card>
@@ -154,79 +130,52 @@ export function DashboardPage() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card className="p-5">
-          <div className="text-micro text-tertiary/60">Highest alignment</div>
+          <div className="text-micro text-tertiary/60">Alignement le plus fort</div>
           <div className="mt-4 space-y-1">
             {highAlignment.map((i) => (
-              <IdeaLinkRow key={i.id} idea={i} meta={`Alignment ${i.personalAlignment}/10`} />
+              <IdeaLinkRow key={i.id} idea={i} meta={`Alignement ${i.personalAlignment}/10`} />
             ))}
           </div>
         </Card>
         <Card className="p-5">
-          <div className="text-micro text-tertiary/60">Quick validation</div>
+          <div className="text-micro text-tertiary/60">Validation rapide</div>
           <div className="mt-4 space-y-1">
             {quickTests.map((i) => (
               <IdeaLinkRow
                 key={i.id}
                 idea={i}
-                meta={`Speed ${i.speedToValidation}/10 • Complexity ${i.complexityLevel}/10`}
+                meta={`Validation speed ${i.speedToValidation}/10 • Complexity ${i.complexityLevel}/10`}
               />
             ))}
           </div>
         </Card>
         <Card className="p-5">
-          <div className="text-micro text-tertiary/60">Needs validation</div>
+          <div className="text-micro text-tertiary/60">À valider</div>
           <div className="mt-4 space-y-1">
             {needingValidation.length ? (
               needingValidation.map((i) => (
                 <IdeaLinkRow key={i.id} idea={i} meta={statusLabels[i.status]} />
               ))
             ) : (
-              <div className="text-xs text-tertiary/55">No ideas in explore/validate.</div>
+              <div className="text-xs text-tertiary/55">Aucune idée en Explore/Validate.</div>
             )}
           </div>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card className="p-5">
-          <div className="flex items-baseline justify-between gap-2">
-            <div className="text-micro text-tertiary/60">Most connected ideas</div>
-            <Link to="/app/synergy" className="text-micro text-tertiary/60 hover:text-tertiary">
-              Synergy map →
-            </Link>
-          </div>
-          <div className="mt-4 space-y-1">
-            {mostConnected.map(({ idea, count }) => (
-              <IdeaLinkRow key={idea.id} idea={idea} meta={`${count} synergy links`} />
-            ))}
-          </div>
-        </Card>
-        <Card className="p-5">
-          <div className="flex items-baseline justify-between gap-2">
-            <div className="text-micro text-tertiary/60">Weekly review</div>
-            <Link to="/app/review" className="text-micro text-tertiary/60 hover:text-tertiary">
-              Full review →
-            </Link>
-          </div>
-          {latestReview ? (
-            <div className="mt-4">
-              <div className="text-sm font-semibold text-midnight">{latestReview.weekLabel}</div>
-              {latestReview.summary ? (
-                <p className="mt-2 line-clamp-3 text-xs leading-relaxed text-tertiary/70">
-                  {latestReview.summary}
-                </p>
-              ) : null}
-              {latestReview.reflections ? (
-                <p className="mt-3 text-xs italic leading-relaxed text-tertiary/60">
-                  “{latestReview.reflections.slice(0, 120)}…”
-                </p>
-              ) : null}
-            </div>
-          ) : (
-            <div className="mt-4 text-xs text-tertiary/55">No reviews yet.</div>
-          )}
-        </Card>
-      </div>
+      <Card className="p-5">
+        <div className="flex items-baseline justify-between gap-2">
+          <div className="text-micro text-tertiary/60">Idées les plus connectées</div>
+          <Link to="/app/synergy" className="text-micro text-tertiary/60 hover:text-tertiary">
+            Synergy map →
+          </Link>
+        </div>
+        <div className="mt-4 space-y-1">
+          {mostConnected.map(({ idea, count }) => (
+            <IdeaLinkRow key={idea.id} idea={idea} meta={`${count} liens Synergy`} />
+          ))}
+        </div>
+      </Card>
     </div>
   )
 }

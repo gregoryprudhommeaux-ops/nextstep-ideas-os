@@ -1,51 +1,17 @@
+import { applyAnalysisToIdeaPatch } from '../ideas/ideaClassification'
+import { resolveIdeaReferenceId } from '../portfolio/portfolioUtils'
 import type { AIProvider, ClassificationProposal, IdeaAIAnalysis, PortfolioVerdict } from '../../types/ai'
-import type { Idea, IdeaInspiration, ScoreDimension } from '../../types/domain'
+import type { Idea, IdeaInspiration } from '../../types/domain'
 import { newId } from '../../lib/id'
 import { nowTimestamp } from '../../lib/time'
+import { mapDimensionScores } from '../scoring/dimensionScores'
+import { normalizeIdeaTextPatch } from '../../lib/prose'
 
 export const VERDICT_LABELS: Record<PortfolioVerdict, string> = {
   new: 'Nouvelle idée',
   extension: 'Extension',
   variant: 'Variante proche',
   sharedBase: 'Socle mutualisé',
-}
-
-const SCORE_KEYS: ScoreDimension[] = [
-  'personalAlignment',
-  'freedomFit',
-  'remoteFit',
-  'scalabilityFit',
-  'revenuePotential',
-  'speedToValidation',
-  'excitementLevel',
-  'complexityLevel',
-  'ecosystemFit',
-  'capitalIntensity',
-]
-
-function clampScore(value?: number): number {
-  if (value == null || Number.isNaN(value)) return 5
-  return Math.max(1, Math.min(10, Math.round(value)))
-}
-
-export function mapDimensionScores(scores?: Record<string, number>): Pick<
-  Idea,
-  | 'personalAlignment'
-  | 'freedomFit'
-  | 'remoteFit'
-  | 'scalabilityFit'
-  | 'revenuePotential'
-  | 'speedToValidation'
-  | 'excitementLevel'
-  | 'complexityLevel'
-  | 'ecosystemFit'
-  | 'capitalIntensity'
-> {
-  const out = {} as Record<string, number>
-  for (const key of SCORE_KEYS) {
-    out[key] = clampScore(scores?.[key])
-  }
-  return out as ReturnType<typeof mapDimensionScores>
 }
 
 export type ApplyVerdictInput = {
@@ -56,6 +22,7 @@ export type ApplyVerdictInput = {
   aiAnalysis?: IdeaAIAnalysis
   provider?: AIProvider
   inspirations?: IdeaInspiration[]
+  ideas?: Idea[]
 }
 
 export function resolveVerdict(
@@ -75,19 +42,27 @@ export function buildIdeaFromBrainstorm(input: ApplyVerdictInput): Idea {
   const portfolioRole =
     verdict === 'extension' ? 'extension' : verdict === 'variant' ? 'variant' : 'standalone'
 
-  return {
+  const parentIdeaId =
+    verdict === 'extension' || verdict === 'variant'
+      ? resolveIdeaReferenceId(input.proposal.targetIdeaId, input.ideas ?? [])
+      : undefined
+
+  const fromAnalysis = applyAnalysisToIdeaPatch(analysis)
+
+  return normalizeIdeaTextPatch({
     id: newId('idea'),
     title: input.proposal.provisionalTitle.trim(),
-    oneLiner: input.proposal.understoodSummary,
+    oneLiner: fromAnalysis.oneLiner ?? input.proposal.understoodSummary,
+    subtitle: fromAnalysis.subtitle,
     description: analysis?.brief ?? input.proposal.understoodSummary,
-    category: 'saasAi',
+    category: fromAnalysis.category!,
     status: 'inbox',
-    horizon: '30_90d',
-    businessModelType: 'services',
-    geography: 'global',
-    audience: analysis?.audience,
-    whyNow: analysis?.whyNow,
-    risks: analysis?.risks,
+    horizon: fromAnalysis.horizon!,
+    businessModelType: fromAnalysis.businessModelType!,
+    geography: fromAnalysis.geography!,
+    audience: fromAnalysis.audience ?? analysis?.audience,
+    whyNow: fromAnalysis.whyNow ?? analysis?.whyNow,
+    risks: fromAnalysis.risks ?? analysis?.risks,
     effortLevel: 5,
     sideBusinessFit: true,
     umbrellaFit: 5,
@@ -103,7 +78,7 @@ export function buildIdeaFromBrainstorm(input: ApplyVerdictInput): Idea {
         }
       : undefined,
     portfolioRole,
-    parentIdeaId: verdict === 'extension' || verdict === 'variant' ? input.proposal.targetIdeaId : undefined,
+    parentIdeaId,
     extensionNote:
       verdict === 'extension' ? input.proposal.understoodSummary : undefined,
     captureSource: 'brainstorm',
@@ -111,7 +86,7 @@ export function buildIdeaFromBrainstorm(input: ApplyVerdictInput): Idea {
     createdAt: now,
     updatedAt: now,
     ...scores,
-  }
+  })
 }
 
 export function provisionalTitleFromRaw(raw: string): string {

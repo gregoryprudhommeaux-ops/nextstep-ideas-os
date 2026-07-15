@@ -7,6 +7,12 @@ import type {
   FilterDefinition,
   FounderProfile,
   Idea,
+  PortfolioGlobalAnalysis,
+  PortfolioNewIdeaSuggestion,
+  PortfolioSharedBaseSuggestion,
+  PortfolioSuggestionStatus,
+  PortfolioSynergySuggestion,
+  PortfolioUmbrellaSuggestion,
   ScoringProfile,
   SharedBase,
   SynergyLink,
@@ -24,7 +30,16 @@ import { newId, slugify } from '../lib/id'
 import { currentWeekLabel, nowTimestamp } from '../lib/time'
 import { createNewIdea, type IdeaCaptureInput } from '../features/ideas/ideaDefaults'
 import type { StevenConfig, StevenEvolutionSource } from '../features/steven/types'
-import type { ClassificationProposal, PortfolioVerdict } from '../types/ai'
+import type { ClassificationProposal, PortfolioScanResult, PortfolioVerdict } from '../types/ai'
+import {
+  buildIdeaDescriptionFromProposal,
+  scanResultToAnalysis,
+} from '../features/portfolio/portfolioAnalysisUtils'
+import {
+  resolveIdeaReferenceId,
+  resolveUmbrellaReferenceId,
+  sanitizeIdeasRelations,
+} from '../features/portfolio/portfolioUtils'
 import {
   buildIdeaFromBrainstorm,
   type ApplyVerdictInput,
@@ -43,6 +58,7 @@ export const EMPTY_DECISION_NOTES: DecisionNote[] = []
 export const EMPTY_UMBRELLA_GROUPS: UmbrellaGroup[] = []
 export const EMPTY_SHARED_BASES: SharedBase[] = []
 export const EMPTY_WEEKLY_REVIEWS: WeeklyReview[] = []
+export const EMPTY_PORTFOLIO_ANALYSES: PortfolioGlobalAnalysis[] = []
 
 export type AppData = {
   version: 2
@@ -57,6 +73,7 @@ export type AppData = {
   founderProfile: FounderProfile | null
   brainstormSessions: BrainstormSession[]
   sharedBases: SharedBase[]
+  portfolioAnalyses: PortfolioGlobalAnalysis[]
   steven: StevenConfig
 }
 
@@ -68,6 +85,37 @@ function synergyStrength(score: number): SynergyStrength {
   if (score >= 6) return 'medium'
   if (score >= 4) return 'weak'
   return 'conflict'
+}
+
+type PortfolioSuggestionKind = 'synergy' | 'umbrella' | 'sharedBase' | 'newIdea'
+
+function patchPortfolioSuggestion(
+  analyses: PortfolioGlobalAnalysis[],
+  analysisId: string,
+  kind: PortfolioSuggestionKind,
+  suggestionId: string,
+  patch: Partial<
+    | PortfolioSynergySuggestion
+    | PortfolioUmbrellaSuggestion
+    | PortfolioSharedBaseSuggestion
+    | PortfolioNewIdeaSuggestion
+  >
+): PortfolioGlobalAnalysis[] {
+  return analyses.map((a) => {
+    if (a.id !== analysisId) return a
+    const mapSuggestion = <T extends { id: string }>(items: T[]) =>
+      items.map((item) => (item.id === suggestionId ? { ...item, ...patch } : item))
+    return touchUpdated({
+      ...a,
+      ...(kind === 'synergy'
+        ? { suggestedSynergies: mapSuggestion(a.suggestedSynergies) }
+        : kind === 'umbrella'
+          ? { umbrellaCandidates: mapSuggestion(a.umbrellaCandidates) }
+          : kind === 'sharedBase'
+            ? { sharedBases: mapSuggestion(a.sharedBases) }
+            : { newIdeaProposals: mapSuggestion(a.newIdeaProposals) }),
+    })
+  })
 }
 
 function commitData(data: AppData): AppData {
@@ -111,6 +159,10 @@ export type AppState = {
     notes?: string
   }) => void
   deleteSynergyLink: (id: string) => void
+  updateSynergyLink: (
+    id: string,
+    patch: { totalSynergyScore?: number; notes?: string }
+  ) => void
 
   addUmbrella: (input: { name: string; promise?: string; ideaIds?: string[] }) => string
   updateUmbrella: (id: string, patch: Partial<UmbrellaGroup>) => void
@@ -153,6 +205,28 @@ export type AppState = {
     verdict: PortfolioVerdict
     targetIdeaId?: string
   }) => string
+
+  savePortfolioAnalysis: (result: PortfolioScanResult) => string
+  updatePortfolioAnalysisNotes: (analysisId: string, userNotes: string) => void
+  updatePortfolioSuggestionNotes: (
+    analysisId: string,
+    kind: 'synergy' | 'umbrella' | 'sharedBase' | 'newIdea',
+    suggestionId: string,
+    userNotes: string
+  ) => void
+  dismissPortfolioSuggestion: (
+    analysisId: string,
+    kind: 'synergy' | 'umbrella' | 'sharedBase' | 'newIdea',
+    suggestionId: string
+  ) => void
+  applyPortfolioSynergySuggestion: (analysisId: string, suggestionId: string) => void
+  applyPortfolioUmbrellaSuggestion: (analysisId: string, suggestionId: string) => void
+  applyPortfolioSharedBaseSuggestion: (analysisId: string, suggestionId: string) => void
+  createIdeaFromPortfolioSuggestion: (
+    analysisId: string,
+    kind: 'umbrella' | 'sharedBase' | 'newIdea',
+    suggestionId: string
+  ) => string
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
@@ -172,7 +246,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   hydrateData: (data) =>
     set(() => ({
-      data,
+      data: { ...data, ideas: sanitizeIdeasRelations(data.ideas) },
       activeProfileId: data.profiles[0]?.id ?? null,
     })),
 
@@ -215,15 +289,31 @@ export const useAppStore = create<AppState>((set, get) => ({
   deleteIdea: (id) =>
     set((s) => {
       if (!s.data) return s
+      const stripId = (ids: string[] | undefined) => (ids ?? []).filter((x) => x !== id)
       const data = commitData({
         ...s.data,
-        ideas: s.data.ideas.filter((i) => i.id !== id),
+        ideas: s.data.ideas
+          .filter((i) => i.id !== id)
+          .map((i) => (i.parentIdeaId === id ? { ...i, parentIdeaId: undefined } : i)),
         synergyLinks: s.data.synergyLinks.filter(
           (l) => l.sourceIdeaId !== id && l.targetIdeaId !== id
         ),
         umbrellaGroups: s.data.umbrellaGroups.map((g) => ({
           ...g,
           ideaIds: g.ideaIds.filter((x) => x !== id),
+        })),
+        sharedBases: s.data.sharedBases.map((b) => ({
+          ...b,
+          ideaIds: b.ideaIds.filter((x) => x !== id),
+        })),
+        decisionNotes: s.data.decisionNotes.filter((n) => n.ideaId !== id),
+        weeklyReviews: s.data.weeklyReviews.map((r) => ({
+          ...r,
+          ideasToExplore: stripId(r.ideasToExplore),
+          ideasToPause: stripId(r.ideasToPause),
+          ideasToTest: stripId(r.ideasToTest),
+          mergeCandidates: stripId(r.mergeCandidates),
+          umbrellaCandidates: stripId(r.umbrellaCandidates),
         })),
       })
       return { data }
@@ -253,6 +343,26 @@ export const useAppStore = create<AppState>((set, get) => ({
         ...s.data,
         synergyLinks: s.data.synergyLinks.filter((l) => l.id !== id),
       })
+      return { data }
+    }),
+
+  updateSynergyLink: (id, patch) =>
+    set((s) => {
+      if (!s.data) return s
+      const synergyLinks = s.data.synergyLinks.map((link) => {
+        if (link.id !== id) return link
+        const score =
+          patch.totalSynergyScore != null
+            ? Math.max(1, Math.min(10, Math.round(patch.totalSynergyScore)))
+            : link.totalSynergyScore
+        return {
+          ...link,
+          totalSynergyScore: score,
+          synergyStrength: synergyStrength(score),
+          notes: patch.notes !== undefined ? patch.notes.trim() || undefined : link.notes,
+        }
+      })
+      const data = commitData({ ...s.data, synergyLinks })
       return { data }
     }),
 
@@ -398,9 +508,15 @@ export const useAppStore = create<AppState>((set, get) => ({
     }),
 
   applyBrainstormVerdict: (input) => {
-    const idea = buildIdeaFromBrainstorm(input)
+    const ideas = get().data?.ideas ?? []
+    const proposal = {
+      ...input.proposal,
+      targetIdeaId: resolveIdeaReferenceId(input.proposal.targetIdeaId, ideas),
+      targetUmbrellaId: resolveUmbrellaReferenceId(input.proposal.targetUmbrellaId, get().data?.umbrellaGroups ?? []),
+    }
+    const idea = buildIdeaFromBrainstorm({ ...input, proposal, ideas })
     const sessionId = input.sessionId
-    const verdict = input.separateIdea ? 'new' : input.proposal.verdict
+    const verdict = input.separateIdea ? 'new' : proposal.verdict
 
     set((s) => {
       if (!s.data) return s
@@ -410,15 +526,15 @@ export const useAppStore = create<AppState>((set, get) => ({
       const sharedBases = [...s.data.sharedBases]
       let umbrellaGroups = s.data.umbrellaGroups
 
-      if (verdict === 'variant' && input.proposal.targetIdeaId) {
+      if (verdict === 'variant' && proposal.targetIdeaId) {
         const score = 7
         synergyLinks.push({
           id: newId('syn'),
           sourceIdeaId: idea.id,
-          targetIdeaId: input.proposal.targetIdeaId,
+          targetIdeaId: proposal.targetIdeaId,
           totalSynergyScore: score,
           synergyStrength: synergyStrength(score),
-          notes: input.proposal.understoodSummary,
+          notes: proposal.understoodSummary,
           createdAt: nowTimestamp(),
         })
       }
@@ -426,12 +542,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (verdict === 'sharedBase') {
         const relatedIds = [
           idea.id,
-          ...(input.proposal.targetIdeaId ? [input.proposal.targetIdeaId] : []),
+          ...(proposal.targetIdeaId ? [proposal.targetIdeaId] : []),
         ]
         sharedBases.push({
           id: newId('base'),
-          name: input.proposal.provisionalTitle,
-          description: input.proposal.understoodSummary,
+          name: proposal.provisionalTitle,
+          description: proposal.understoodSummary,
           ideaIds: relatedIds,
           sharedDimensions: ['backOffice'],
           aiSuggested: true,
@@ -440,8 +556,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         })
       }
 
-      if (input.proposal.targetUmbrellaId) {
-        const umbId = input.proposal.targetUmbrellaId
+      if (proposal.targetUmbrellaId) {
+        const umbId = proposal.targetUmbrellaId
         ideas = ideas.map((i) =>
           i.id === idea.id ? { ...i, umbrellaGroupId: umbId } : i
         )
@@ -457,7 +573,7 @@ export const useAppStore = create<AppState>((set, get) => ({
               ? touchUpdated({
                   ...x,
                   phase: 'applied' as BrainstormPhase,
-                  proposal: input.proposal,
+                  proposal,
                   resultIdeaId: idea.id,
                 })
               : x
@@ -470,7 +586,7 @@ export const useAppStore = create<AppState>((set, get) => ({
               rawInput: input.rawInput,
               questions: [],
               answers: {},
-              proposal: input.proposal,
+              proposal,
               resultIdeaId: idea.id,
               createdAt: nowTimestamp(),
             },
@@ -504,6 +620,228 @@ export const useAppStore = create<AppState>((set, get) => ({
       rawInput: input.rawInput,
       sessionId,
     })
+  },
+
+  savePortfolioAnalysis: (result) => {
+    const analysis = scanResultToAnalysis(result)
+    set((s) => {
+      if (!s.data) return s
+      const data = commitData({
+        ...s.data,
+        portfolioAnalyses: [analysis, ...s.data.portfolioAnalyses],
+      })
+      return { data }
+    })
+    return analysis.id
+  },
+
+  updatePortfolioAnalysisNotes: (analysisId, userNotes) =>
+    set((s) => {
+      if (!s.data) return s
+      const portfolioAnalyses = s.data.portfolioAnalyses.map((a) =>
+        a.id === analysisId ? touchUpdated({ ...a, userNotes }) : a
+      )
+      const data = commitData({ ...s.data, portfolioAnalyses })
+      return { data }
+    }),
+
+  updatePortfolioSuggestionNotes: (analysisId, kind, suggestionId, userNotes) =>
+    set((s) => {
+      if (!s.data) return s
+      const portfolioAnalyses = s.data.portfolioAnalyses.map((a) => {
+        if (a.id !== analysisId) return a
+        const patchNotes = <T extends { id: string; userNotes?: string }>(items: T[]) =>
+          items.map((item) => (item.id === suggestionId ? { ...item, userNotes } : item))
+        const updated = touchUpdated({
+          ...a,
+          ...(kind === 'synergy'
+            ? { suggestedSynergies: patchNotes(a.suggestedSynergies) }
+            : kind === 'umbrella'
+              ? { umbrellaCandidates: patchNotes(a.umbrellaCandidates) }
+              : kind === 'sharedBase'
+                ? { sharedBases: patchNotes(a.sharedBases) }
+                : { newIdeaProposals: patchNotes(a.newIdeaProposals) }),
+        })
+        return updated
+      })
+      const data = commitData({ ...s.data, portfolioAnalyses })
+      return { data }
+    }),
+
+  dismissPortfolioSuggestion: (analysisId, kind, suggestionId) =>
+    set((s) => {
+      if (!s.data) return s
+      const portfolioAnalyses = patchPortfolioSuggestion(s.data.portfolioAnalyses, analysisId, kind, suggestionId, {
+        status: 'dismissed',
+      })
+      const data = commitData({ ...s.data, portfolioAnalyses })
+      return { data }
+    }),
+
+  applyPortfolioSynergySuggestion: (analysisId, suggestionId) => {
+    const state = get()
+    if (!state.data) return
+    const analysis = state.data.portfolioAnalyses.find((a) => a.id === analysisId)
+    const suggestion = analysis?.suggestedSynergies.find((x) => x.id === suggestionId)
+    if (!suggestion || suggestion.status !== 'open') return
+
+    const linkId = newId('syn')
+    set((s) => {
+      if (!s.data) return s
+      const synergyLinks = [
+        ...s.data.synergyLinks,
+        {
+          id: linkId,
+          sourceIdeaId: suggestion.sourceIdeaId,
+          targetIdeaId: suggestion.targetIdeaId,
+          totalSynergyScore: suggestion.score,
+          synergyStrength: synergyStrength(suggestion.score),
+          notes: [suggestion.note, suggestion.userNotes].filter(Boolean).join('\n\n'),
+          createdAt: nowTimestamp(),
+        },
+      ]
+      const portfolioAnalyses = patchPortfolioSuggestion(
+        s.data.portfolioAnalyses,
+        analysisId,
+        'synergy',
+        suggestionId,
+        { status: 'applied', resultLinkId: linkId }
+      )
+      const data = commitData({ ...s.data, synergyLinks, portfolioAnalyses })
+      return { data }
+    })
+  },
+
+  applyPortfolioUmbrellaSuggestion: (analysisId, suggestionId) => {
+    const state = get()
+    if (!state.data) return
+    const analysis = state.data.portfolioAnalyses.find((a) => a.id === analysisId)
+    const suggestion = analysis?.umbrellaCandidates.find((x) => x.id === suggestionId)
+    if (!suggestion || suggestion.status !== 'open') return
+
+    const umbrellaId = get().addUmbrella({
+      name: suggestion.name,
+      promise: [suggestion.note, suggestion.userNotes].filter(Boolean).join('\n\n'),
+      ideaIds: suggestion.ideaIds,
+    })
+
+    set((s) => {
+      if (!s.data) return s
+      const portfolioAnalyses = patchPortfolioSuggestion(
+        s.data.portfolioAnalyses,
+        analysisId,
+        'umbrella',
+        suggestionId,
+        { status: 'applied', resultUmbrellaId: umbrellaId }
+      )
+      const data = commitData({ ...s.data, portfolioAnalyses })
+      return { data }
+    })
+  },
+
+  applyPortfolioSharedBaseSuggestion: (analysisId, suggestionId) => {
+    const state = get()
+    if (!state.data) return
+    const analysis = state.data.portfolioAnalyses.find((a) => a.id === analysisId)
+    const suggestion = analysis?.sharedBases.find((x) => x.id === suggestionId)
+    if (!suggestion || suggestion.status !== 'open') return
+
+    const baseId = get().addSharedBase({
+      name: suggestion.name,
+      description: [suggestion.note, suggestion.userNotes].filter(Boolean).join('\n\n'),
+      ideaIds: suggestion.ideaIds,
+      sharedDimensions: suggestion.dimensions,
+      aiSuggested: true,
+    })
+
+    set((s) => {
+      if (!s.data) return s
+      const portfolioAnalyses = patchPortfolioSuggestion(
+        s.data.portfolioAnalyses,
+        analysisId,
+        'sharedBase',
+        suggestionId,
+        { status: 'applied', resultSharedBaseId: baseId }
+      )
+      const data = commitData({ ...s.data, portfolioAnalyses })
+      return { data }
+    })
+  },
+
+  createIdeaFromPortfolioSuggestion: (analysisId, kind, suggestionId) => {
+    const state = get()
+    if (!state.data) return ''
+    const analysis = state.data.portfolioAnalyses.find((a) => a.id === analysisId)
+    if (!analysis) return ''
+
+    let title = ''
+    let description = ''
+    let patch: Partial<
+      PortfolioUmbrellaSuggestion | PortfolioSharedBaseSuggestion | PortfolioNewIdeaSuggestion
+    > = {}
+
+    if (kind === 'newIdea') {
+      const suggestion = analysis.newIdeaProposals.find((x) => x.id === suggestionId)
+      if (!suggestion) return ''
+      if (suggestion.resultIdeaId) return suggestion.resultIdeaId
+      if (suggestion.status !== 'open') return ''
+      title = suggestion.title
+      description = buildIdeaDescriptionFromProposal([
+        suggestion.oneLiner,
+        suggestion.description,
+        suggestion.rationale,
+        suggestion.userNotes,
+        '— Proposé par Steven (Analyse globale)',
+      ])
+      patch = { status: 'converted' as PortfolioSuggestionStatus }
+    } else if (kind === 'umbrella') {
+      const suggestion = analysis.umbrellaCandidates.find((x) => x.id === suggestionId)
+      if (!suggestion) return ''
+      if (suggestion.resultIdeaId) return suggestion.resultIdeaId
+      if (suggestion.status !== 'open') return ''
+      title = suggestion.name
+      description = buildIdeaDescriptionFromProposal([
+        suggestion.note,
+        suggestion.userNotes,
+        '— Proposé par Steven (Analyse globale, umbrella)',
+      ])
+      patch = { status: 'converted' as PortfolioSuggestionStatus }
+    } else {
+      const suggestion = analysis.sharedBases.find((x) => x.id === suggestionId)
+      if (!suggestion) return ''
+      if (suggestion.resultIdeaId) return suggestion.resultIdeaId
+      if (suggestion.status !== 'open') return ''
+      title = suggestion.name
+      description = buildIdeaDescriptionFromProposal([
+        suggestion.note,
+        suggestion.userNotes,
+        '— Proposé par Steven (Analyse globale, socle)',
+      ])
+      patch = { status: 'converted' as PortfolioSuggestionStatus }
+    }
+
+    const ideaId = get().addIdea({
+      title,
+      description,
+      category: 'service',
+      status: 'inbox',
+      horizon: '3_12m',
+    })
+
+    set((s) => {
+      if (!s.data) return s
+      const portfolioAnalyses = patchPortfolioSuggestion(
+        s.data.portfolioAnalyses,
+        analysisId,
+        kind,
+        suggestionId,
+        { ...patch, resultIdeaId: ideaId }
+      )
+      const data = commitData({ ...s.data, portfolioAnalyses })
+      return { data }
+    })
+
+    return ideaId
   },
 }))
 

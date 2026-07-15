@@ -42,6 +42,52 @@ export function ideaTitleById(ideas: Idea[], id: string): string {
   return ideas.find((i) => i.id === id)?.title ?? id
 }
 
+export function ideaExists(ideas: Idea[], id: string | undefined): boolean {
+  return Boolean(id && ideas.some((i) => i.id === id))
+}
+
+/** Map AI portfolio references onto real idea ids (exact id, title, or partial match). */
+export function resolveIdeaReferenceId(
+  ref: string | undefined,
+  ideas: Idea[]
+): string | undefined {
+  if (!ref?.trim()) return undefined
+  const trimmed = ref.trim()
+  const exact = ideas.find((i) => i.id === trimmed)
+  if (exact) return exact.id
+
+  const lower = trimmed.toLowerCase()
+  const byTitle = ideas.find((i) => i.title.toLowerCase() === lower)
+  if (byTitle) return byTitle.id
+
+  const partial = ideas.find(
+    (i) => i.id.includes(trimmed) || trimmed.includes(i.id) || i.title.toLowerCase().includes(lower)
+  )
+  return partial?.id
+}
+
+export function resolveUmbrellaReferenceId(
+  ref: string | undefined,
+  groups: UmbrellaGroup[]
+): string | undefined {
+  if (!ref?.trim()) return undefined
+  const trimmed = ref.trim()
+  if (groups.some((g) => g.id === trimmed)) return trimmed
+  if (trimmed.startsWith('umbrella:')) {
+    const id = trimmed.slice('umbrella:'.length)
+    if (groups.some((g) => g.id === id)) return id
+  }
+  const byName = groups.find((g) => g.name.toLowerCase() === trimmed.toLowerCase())
+  return byName?.id
+}
+
+export function sanitizeIdeasRelations(ideas: Idea[]): Idea[] {
+  const ids = new Set(ideas.map((i) => i.id))
+  return ideas.map((idea) =>
+    idea.parentIdeaId && !ids.has(idea.parentIdeaId) ? { ...idea, parentIdeaId: undefined } : idea
+  )
+}
+
 export function umbrellasForIdea(umbrellas: UmbrellaGroup[], ideaId: string): UmbrellaGroup[] {
   return umbrellas.filter((u) => u.ideaIds.includes(ideaId))
 }

@@ -1,33 +1,28 @@
 import { useCallback, useState } from 'react'
-import type { PortfolioScanResult } from '../../types/ai'
 import { portfolioScan } from '../ai/router'
 import { useAIRouterContext } from '../brainstorm/useAIRouterContext'
+import { useAppStore } from '../../app/store'
 
 export function usePortfolioScan() {
   const ctx = useAIRouterContext()
-  const [result, setResult] = useState<PortfolioScanResult | null>(null)
+  const savePortfolioAnalysis = useAppStore((s) => s.savePortfolioAnalysis)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const scan = useCallback(async () => {
-    if (!ctx.isAvailable) return
+  const scan = useCallback(async (): Promise<string | null> => {
+    if (!ctx.isAvailable) return null
     setLoading(true)
     setError(null)
     try {
       const scanResult = await portfolioScan(ctx)
-      setResult(scanResult)
+      return savePortfolioAnalysis(scanResult)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Erreur lors du scan')
-      setResult(null)
+      return null
     } finally {
       setLoading(false)
     }
-  }, [ctx])
+  }, [ctx, savePortfolioAnalysis])
 
-  const clear = useCallback(() => {
-    setResult(null)
-    setError(null)
-  }, [])
-
-  return { result, loading, error, scan, clear, isAvailable: ctx.isAvailable, loaded: ctx.loaded }
+  return { loading, error, scan, isAvailable: ctx.isAvailable, loaded: ctx.loaded }
 }

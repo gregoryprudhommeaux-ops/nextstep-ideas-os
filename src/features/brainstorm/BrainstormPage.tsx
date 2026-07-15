@@ -1,12 +1,16 @@
 import { Link } from 'react-router-dom'
+import { ArrowRight, Check, Settings } from 'lucide-react'
 import { SectionHeader } from '../../components/SectionHeader'
 import { Card } from '../../components/ui/Card'
 import { Textarea } from '../../components/ui/Textarea'
 import { Button } from '../../components/ui/Button'
 import { AIBanner } from '../../components/AIBanner'
 import { cn } from '../../lib/cn'
+import { optionsForDisplay, UNSURE_ANSWER_LABEL } from './clarifyingOptions'
 import { useBrainstorm } from './useBrainstorm'
 import { ManualClassification } from './ManualClassification'
+import { SpeechDictationBar } from '../speech/SpeechDictationBar'
+import { appendDictationText } from '../speech/appendDictationText'
 
 const verdictLabels: Record<string, string> = {
   new: 'Nouvelle idée',
@@ -37,13 +41,19 @@ export function BrainstormPage() {
 
   const busy = phase === 'loading' || phase === 'applying'
 
+  const appendDictation = (spoken: string) => {
+    setRawInput((prev) => appendDictationText(prev, spoken))
+  }
+
   return (
     <div className="mx-auto max-w-2xl space-y-8">
-      <SectionHeader
-        eyebrow="Flux du moment"
-        title="Qu'est-ce qui te traverse l'esprit ?"
-        description="Partage une pensée brute — Steven clarifie, classe et enrichit sa compréhension de toi à chaque échange validé."
-      />
+      {phase !== 'done' ? (
+        <SectionHeader
+          eyebrow="Flux du moment"
+          title="Qu'est-ce qui te traverse l'esprit ?"
+          description="Partage une pensée brute — Steven clarifie, classe et enrichit sa compréhension de toi à chaque échange validé."
+        />
+      ) : null}
 
       {loaded && !isAvailable ? <AIBanner /> : null}
 
@@ -52,26 +62,70 @@ export function BrainstormPage() {
       ) : null}
 
       {phase === 'done' ? (
-        <Card className="space-y-4 border-primary/30 bg-primary/5 p-5">
-          <div className="text-sm font-bold text-midnight">Échange enregistré</div>
-          <p className="text-sm leading-relaxed text-tertiary/80">
-            Steven a mis à jour sa compréhension de ton profil. Tu peux voir le détail dans{' '}
-            <Link to="/app/settings" className="font-medium text-midnight underline-offset-2 hover:underline">
-              Settings
-            </Link>
-            .
-          </p>
-          {resultIdeaId ? (
-            <Link
-              to={`/app/ideas/${resultIdeaId}`}
-              className="inline-block text-sm font-medium text-midnight underline-offset-2 hover:underline"
-            >
-              Voir l'idée créée →
-            </Link>
-          ) : null}
-          <Button type="button" variant="ghost" onClick={reset}>
-            Nouvel échange
-          </Button>
+        <Card className="overflow-hidden border-primary/35 p-0 shadow-sm">
+          <div className="border-b border-primary/20 bg-primary/10 px-5 py-5 sm:px-6">
+            <div className="flex items-start gap-4">
+              <div
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[--radius-sharp] bg-primary/30"
+                aria-hidden
+              >
+                <Check className="h-5 w-5 text-midnight" strokeWidth={2.5} />
+              </div>
+              <div className="min-w-0 pt-0.5">
+                <div className="text-micro font-semibold text-midnight/55">Échange enregistré</div>
+                <h2 className="mt-1 text-balance text-xl font-black tracking-tight text-midnight sm:text-2xl">
+                  Steven a intégré ta pensée
+                </h2>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
+            <p className="text-sm leading-relaxed text-tertiary/80">
+              {resultIdeaId
+                ? 'Une nouvelle entrée a été ajoutée à ton Portfolio. Steven a aussi mis à jour sa compréhension de ton profil fondateur.'
+                : 'Steven a enrichi sa compréhension de ton profil — sans nouvelle idée dans le Portfolio cette fois.'}
+            </p>
+
+            <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+              {resultIdeaId ? (
+                <Link to={`/app/ideas/${resultIdeaId}`} className="w-full sm:w-auto">
+                  <Button type="button" className="w-full gap-2 sm:min-w-[12rem]">
+                    Voir l&apos;idée créée
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/app/portfolio" className="w-full sm:w-auto">
+                  <Button type="button" className="w-full gap-2 sm:min-w-[12rem]">
+                    Ouvrir le Portfolio
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={reset}
+                className="w-full sm:w-auto sm:min-w-[10rem]"
+              >
+                Nouvel échange
+              </Button>
+            </div>
+
+            <div className="flex items-center gap-2 border-t border-alternate/50 pt-4 text-xs text-tertiary/65">
+              <Settings className="h-3.5 w-3.5 shrink-0 text-tertiary/45" aria-hidden />
+              <span>
+                Détail des apprentissages dans{' '}
+                <Link
+                  to="/app/settings"
+                  className="font-semibold text-midnight underline decoration-primary/40 underline-offset-2 hover:decoration-primary"
+                >
+                  Settings
+                </Link>
+              </span>
+            </div>
+          </div>
         </Card>
       ) : null}
 
@@ -89,6 +143,7 @@ export function BrainstormPage() {
             className="min-h-[160px]"
             disabled={busy}
           />
+          <SpeechDictationBar disabled={busy} onAppend={appendDictation} />
           <div className="flex justify-end">
             <Button
               type="button"
@@ -113,7 +168,7 @@ export function BrainstormPage() {
             <div key={q.id} className="space-y-2">
               <div className="text-sm text-midnight">{q.text}</div>
               <div className="flex flex-wrap gap-2">
-                {q.options.map((opt) => (
+                {optionsForDisplay(q.options).map((opt) => (
                   <button
                     key={opt.id}
                     type="button"
@@ -130,15 +185,15 @@ export function BrainstormPage() {
                 ))}
                 <button
                   type="button"
-                  onClick={() => setAnswer(q.id, 'Je ne sais pas encore')}
+                  onClick={() => setAnswer(q.id, UNSURE_ANSWER_LABEL)}
                   className={cn(
                     'rounded-full border border-dashed px-3 py-1.5 text-xs font-medium transition',
-                    answers[q.id] === 'Je ne sais pas encore'
+                    answers[q.id] === UNSURE_ANSWER_LABEL
                       ? 'border-primary/50 bg-primary/15 text-midnight'
                       : 'border-alternate/60 text-tertiary/60 hover:border-alternate'
                   )}
                 >
-                  Je ne sais pas encore
+                  {UNSURE_ANSWER_LABEL}
                 </button>
               </div>
             </div>

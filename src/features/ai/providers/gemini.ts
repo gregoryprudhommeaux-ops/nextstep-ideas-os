@@ -14,7 +14,11 @@ function toGeminiMessages(messages: ChatMessage[]) {
   }
 }
 
-export async function geminiChat(apiKey: string, messages: ChatMessage[]): Promise<string> {
+export async function geminiChat(
+  apiKey: string,
+  messages: ChatMessage[],
+  jsonMode = true
+): Promise<string> {
   const { systemInstruction, contents } = toGeminiMessages(messages)
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`
   const controller = new AbortController()
@@ -26,7 +30,7 @@ export async function geminiChat(apiKey: string, messages: ChatMessage[]): Promi
       body: JSON.stringify({
         ...(systemInstruction ? { systemInstruction } : {}),
         contents,
-        generationConfig: { responseMimeType: 'application/json' },
+        ...(jsonMode ? { generationConfig: { responseMimeType: 'application/json' } } : {}),
       }),
       signal: controller.signal,
     })
