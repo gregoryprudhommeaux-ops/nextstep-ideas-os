@@ -1,9 +1,37 @@
 # Changelog · /anti-linkedin-slop · Mr. ANTI-AI-SLOP
 
+## 2026-07-15 (i) — la-mesa app sync
+
+- Force-synced canonical `~/.cursor/skills/` → `Projects/la-mesa/.cursor/skills/` for `anti-linkedin-slop`, `lucy-community-marketing`, `charles-linkedin-strategist`.
+- Confirmed project rule `.cursor/rules/anti-linkedin-slop-gate.mdc` (soft survey-hook + Lucy for member templates / Charles for Gregory LinkedIn).
+
+## 2026-07-15 (h) — Soft survey-hook + qualification triad
+
+New tells (same false-consensus arc, softer wording):
+- Soft-hear: *phrase que j’entends souvent* / *phrase I often hear* / *frase que escucho* + fabricated category quote
+- Dig variants: *En creusant* / *Digging a bit* / *Al indagar*
+- Symmetric 3-bullet qualification framework (*même problème / niveau / agenda*)
+- Soft antithesis packaging: *moins de X, plus de Y* (twin of *beaucoup… peu…*)
+
+UCM mirrors: banned openers, `SURVEY_HOOK_PATTERNS`, banned-phrases, slop-detector (`soft_survey_hear`, `qualification_triad`, `less_more_packaging`), humanize blocking flags, humanizer compact hints.
+
+Charles + Lucy gate lists updated to treat soft survey-hook as blocking (same as hard).
+
+## 2026-07-15 (g) — UCM server humanize gate
+
+- `humanize-article-pass.ts` runs after generate + revise when slop is detected (FR/EN/ES).
+- Repurpose / first-comment / quality prompts inherit anti-slop.
+
 ## 2026-07-15 (f) — Wired into Charles + Lucy
 
 - `charles-linkedin-strategist` and `lucy-community-marketing` must run this skill (ANALYZE → HUMANIZE) before delivering copy.
 - Synced to UCM, nextstep-idea-os, la-mesa, ns-suite (+ personal ~/.cursor/skills).
+
+## 2026-07-15 (f) — Templates membres explicites
+
+- Lucy + Charles gate wording now explicitly covers **member communication templates** (email/Brevo/WhatsApp/nurture/RSVP).
+- Lucy `examples.md`: adapted templates still require ANALYZE → HUMANIZE before ship.
+- LA MESA project rule `.cursor/rules/anti-linkedin-slop-gate.mdc` aligned.
 
 ## 2026-07-15 (e) — Mr. ANTI-AI-SLOP agent prompt
 
