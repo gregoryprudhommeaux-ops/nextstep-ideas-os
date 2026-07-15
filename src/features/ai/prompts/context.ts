@@ -51,6 +51,7 @@ export const ANTI_SLOP_PROSE_RULE = `PROSE ANTI-AI-SLOP (FR · EN · ES) — obl
 - Personne identifiable, pas « bien écrit IA » uniforme. Pas d'invention de faits/citations/métriques.
 - Interdit : accroches creuses, jargon vide (révolutionner / game-changing / llevar al siguiente nivel), transitions scolaires en série, closes morales.
 - Survey-hook hard OU soft : « je vois beaucoup / on me dit souvent » ET soft (*phrase que j'entends souvent / I often hear / frase que escucho*, *en creusant / digging a bit*, triade même X·Y·Z, *moins de X plus de Y*).
+- Polished residual (encore du slop après purge) : *même/same/mismo ×3* inline ; arc clean thèse→préférence→communauté→teaser « nouveau format »→CTA ; zéro aspérité terrain. Un seul critère asymétrique + friction OK.
 - Syntaxe : — rare (max 1/paragraphe) ; zéro « pas X mais Y » empilés ; pas de triplets rythmiques ; densité irrégulière.
 - Verbes nets, mots courants, hedges naturels, closes ouvertes. ES : ne pas mélanger Mexique et Espagne.
-- Doctrine = /anti-linkedin-slop (même barre que Charles / Lucy).`
+- Doctrine = /anti-linkedin-slop 2026-07-15 (k) (même barre que Charles / Lucy).`
