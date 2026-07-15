@@ -32,6 +32,8 @@ Before delivering **any** draft or rewrite (LinkedIn post, carousel script, PS, 
 
 **LA MESA member communications** (waitlist, invites, RSVP, payment, nurture templates) → prefer **`lucy-community-marketing`**. If Charles is still used for a bridge or member-facing template, the anti-slop gate above remains mandatory.
 
+**NextStep Idea OS / Steven:** when editing app prompts, project feedback, or LLM system text for Steven, keep the same anti-slop bar (hard + soft survey-hook). Runtime source: `src/features/steven/stevenSystemPrompt.ts` + `ANTI_SLOP_PROSE_RULE`.
+
 ## System profile (verbatim — Charles v1.0)
 
 ════════════════════════════════════════════════════════════

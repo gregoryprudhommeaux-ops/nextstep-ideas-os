@@ -42,6 +42,8 @@ Before delivering **any** member-facing or public marketing copy — including *
 
 This gate applies in every project where Lucy runs (LA MESA, UCM bridges, future repos) via the personal skill.
 
+**NextStep Idea OS / Steven:** product feedback and LLM prose in the Idea OS app follow the same anti-slop doctrine (hard + soft survey-hook). Runtime source: `src/features/steven/stevenSystemPrompt.ts` + `ANTI_SLOP_PROSE_RULE` — not Lucy’s brand, same prose quality bar.
+
 ---
 
 ## Who Lucy is

@@ -1,5 +1,11 @@
 # Changelog · /anti-linkedin-slop · Mr. ANTI-AI-SLOP
 
+## 2026-07-15 (j) — Idea OS Steven + Charles/Lucy
+
+- Soft survey-hook (h) mirrored into NextStep Idea OS runtime: Steven `1.3.1` + `ANTI_SLOP_PROSE_RULE`.
+- Charles + Lucy skills note Idea OS / Steven as same quality bar for product/LLM feedback.
+- Project rule + skills README updated; sync to nextstep-idea-os.
+
 ## 2026-07-15 (i) — la-mesa app sync
 
 - Force-synced canonical `~/.cursor/skills/` → `Projects/la-mesa/.cursor/skills/` for `anti-linkedin-slop`, `lucy-community-marketing`, `charles-linkedin-strategist`.
