@@ -13,6 +13,7 @@ export type AITaskRole =
   | 'ideaExtrapolate'
   | 'ideaBrainstorm'
   | 'ideaBmcCanvas'
+  | 'ideaDecisionMatrix'
 
 export type AIProviderConfig = {
   apiKey: string
@@ -33,6 +34,7 @@ export const DEFAULT_AI_SETTINGS: AISettings = {
   defaultAnalysisProvider: 'openai',
   taskRouting: {
     marketResearch: 'perplexity',
+    ideaDecisionMatrix: 'perplexity',
   },
   persistKeys: true,
 }
@@ -233,4 +235,22 @@ export type BusinessModelCanvasResult = {
   blocks: Record<BmcBlockKey, BmcBlock>
   overallGaps: string[]
   synthesis: string
+}
+
+/** Steven fill/challenge payload for the decision matrix (score computed client-side). */
+export type DecisionMatrixAIResult = {
+  niche: string
+  competitorsOver100k: 'yes' | 'no' | 'unknown'
+  topCompetitors: {
+    name: string
+    revenue: string
+    revenueConfidence?: 'low' | 'medium' | 'high'
+    sourceNote?: string
+  }[]
+  simplicity: number
+  noSocial: boolean
+  kiff: number
+  marketability: number
+  stevenChallenge: string
+  stevenNotes?: string
 }

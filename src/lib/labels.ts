@@ -27,3 +27,15 @@ export const horizonLabels: Record<HorizonType, string> = {
   '3_12m': '3–12 mois',
   '1_3y': '1–3 ans',
 }
+
+export const competitorsOver100kLabels: Record<'yes' | 'no' | 'unknown', string> = {
+  yes: 'Oui — au moins 2 à +100k',
+  no: 'Non',
+  unknown: 'Pas encore clair',
+}
+
+export const revenueConfidenceLabels: Record<'low' | 'medium' | 'high', string> = {
+  low: 'Faible',
+  medium: 'Moyenne',
+  high: 'Forte',
+}

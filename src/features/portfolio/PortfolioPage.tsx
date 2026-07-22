@@ -18,6 +18,7 @@ import { usePortfolioScoreRefresh } from '../ideas/usePortfolioScoreRefresh'
 import { SynergyStrengthBadge } from '../../components/SynergyStrengthBadge'
 import { getPartnerId } from '../synergy/synergyUtils'
 import { StrategicFitMatrix } from '../ideas/StrategicFitMatrix'
+import { DecisionMatrixPortfolioTable } from '../ideas/DecisionMatrixPortfolioTable'
 
 function IdeaRow({ idea }: { idea: { id: string; title: string; oneLiner?: string; status: string } }) {
   return (
@@ -159,6 +160,8 @@ export function PortfolioPage() {
       </div>
 
       {ideas.length > 0 ? <StrategicFitMatrix ideas={ideas} scoreRefresh={scoreRefresh} /> : null}
+
+      {ideas.length > 0 ? <DecisionMatrixPortfolioTable ideas={ideas} /> : null}
 
       {ideas.length === 0 ? (
         <Card className="p-6 text-center text-sm text-tertiary/70">

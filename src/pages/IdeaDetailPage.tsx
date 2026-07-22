@@ -20,6 +20,7 @@ import { SynergyStrengthBadge } from '../components/SynergyStrengthBadge'
 import { getLinksForIdea, getPartnerId } from '../features/synergy/synergyUtils'
 import { ideaExists } from '../features/portfolio/portfolioUtils'
 import { IdeaMarketResearchPanel } from '../features/ideas/IdeaMarketResearchPanel'
+import { IdeaDecisionMatrixPanel } from '../features/ideas/IdeaDecisionMatrixPanel'
 import { IdeaRefinementPanel } from '../features/ideas/IdeaRefinementPanel'
 import { IdeaExtrapolationPanel } from '../features/ideas/IdeaExtrapolationPanel'
 import { StrategicFitCard } from '../features/ideas/StrategicFitCard'
@@ -237,6 +238,8 @@ export function IdeaDetailPage() {
       ) : null}
 
       <IdeaMarketResearchPanel idea={idea} />
+
+      <IdeaDecisionMatrixPanel idea={idea} />
 
       <IdeaRefinementPanel idea={idea} />
 

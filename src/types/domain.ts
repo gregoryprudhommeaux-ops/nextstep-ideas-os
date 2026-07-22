@@ -8,6 +8,35 @@ import type {
   BusinessModelCanvasResult,
 } from './ai'
 
+export type CompetitorsOver100kStatus = 'yes' | 'no' | 'unknown'
+
+export type DecisionMatrixCompetitor = {
+  name: string
+  /** Free-text estimate or "unknown" — never treat invented App Store figures as fact */
+  revenue: string
+  revenueConfidence?: 'low' | 'medium' | 'high'
+  sourceNote?: string
+}
+
+/** Evidence-first decision matrix (Google Sheet / profitable-app lens). */
+export type DecisionMatrix = {
+  niche: string
+  competitorsOver100k: CompetitorsOver100kStatus
+  topCompetitors: DecisionMatrixCompetitor[]
+  simplicity: number
+  noSocial: boolean
+  kiff: number
+  marketability: number
+  /** simplicity + kiff + marketability + (noSocial ? 1 : 0), max 16 */
+  scoreTotal: number
+  /** Hard signal when competitorsOver100k === 'no' */
+  evidenceVeto: boolean
+  stevenChallenge?: string
+  stevenNotes?: string
+  evaluatedAt?: FirestoreTime
+  provider?: AIProvider
+}
+
 export type Role = 'owner' | 'viewer'
 
 export type IdeaStatus = 'inbox' | 'explore' | 'validate' | 'build' | 'archive'
@@ -154,6 +183,8 @@ export type Idea = WithTimestamps & {
     generatedAt: FirestoreTime
     provider: AIProvider
   }
+  /** Evidence-first decision matrix (sheet-aligned) */
+  decisionMatrix?: DecisionMatrix
 }
 
 export type IdeaBrainstormMessage = WithTimestamps & {

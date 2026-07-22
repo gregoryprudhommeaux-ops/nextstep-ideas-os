@@ -261,6 +261,28 @@ export const businessModelCanvasSchema = z.object({
   synthesis: z.string().min(1),
 })
 
+export const decisionMatrixSchema = z.object({
+  niche: z.string().min(1),
+  competitorsOver100k: z.enum(['yes', 'no', 'unknown']),
+  topCompetitors: z
+    .array(
+      z.object({
+        name: z.string().min(1),
+        revenue: z.string().min(1),
+        revenueConfidence: z.enum(['low', 'medium', 'high']).optional(),
+        sourceNote: z.string().optional(),
+      })
+    )
+    .min(0)
+    .max(3),
+  simplicity: z.number().min(1).max(5),
+  noSocial: z.boolean(),
+  kiff: z.number().min(1).max(5),
+  marketability: z.number().min(1).max(5),
+  stevenChallenge: z.string().min(1),
+  stevenNotes: z.string().optional(),
+})
+
 export const marketResearchSchema = z.object({
   summary: z.string(),
   trends: z.array(z.string()),

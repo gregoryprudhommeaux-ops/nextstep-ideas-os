@@ -21,6 +21,7 @@ import type {
   StevenEvolutionResult,
   WeeklyReviewSummaryResult,
   BusinessModelCanvasResult,
+  DecisionMatrixAIResult,
 } from '../../types/ai'
 import { nowTimestamp } from '../../lib/time'
 import { mergeMarketSources } from '../../lib/citations'
@@ -45,6 +46,7 @@ import {
   portfolioScanSchema,
   synergySuggestSchema,
   businessModelCanvasSchema,
+  decisionMatrixSchema,
   stevenEvolutionResultSchema,
   weeklyReviewSummarySchema,
 } from './schemas'
@@ -64,6 +66,7 @@ import {
   IDEA_BRAINSTORM_SYSTEM_ADDON,
   ideaBrainstormContextBlock,
   businessModelCanvasPrompt,
+  decisionMatrixPrompt,
 } from './prompts/tasks'
 import { buildFounderContext, buildPortfolioContext, buildExistingSynergiesContext, JSON_ONLY_RULE } from './prompts/context'
 import { needsScoreCalibration } from '../scoring/dimensionScores'
@@ -146,6 +149,7 @@ export function isAIAvailable(settings: AISettings, task?: AITaskRole): boolean 
     'ideaExtrapolate',
     'ideaBrainstorm',
     'ideaBmcCanvas',
+    'ideaDecisionMatrix',
   ]
   return coreTasks.some((t) => resolveProviderForTask(settings, t) !== null)
 }
@@ -545,5 +549,17 @@ export async function generateBusinessModelCanvas(
     'ideaBmcCanvas',
     businessModelCanvasPrompt(idea, buildFounderContext(ctx.founderProfile)),
     businessModelCanvasSchema
+  )
+}
+
+export async function fillDecisionMatrix(
+  ctx: AIRouterContext,
+  idea: Idea
+): Promise<DecisionMatrixAIResult> {
+  return chatJson(
+    ctx,
+    'ideaDecisionMatrix',
+    decisionMatrixPrompt(idea, buildFounderContext(ctx.founderProfile)),
+    decisionMatrixSchema
   )
 }

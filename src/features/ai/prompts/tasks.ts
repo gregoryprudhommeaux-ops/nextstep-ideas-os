@@ -698,3 +698,106 @@ ${founderContext}
 FICHE IDÉE:
 ${snapshot}`
 }
+
+export function decisionMatrixPrompt(
+  idea: {
+    title: string
+    subtitle?: string
+    oneLiner?: string
+    description?: string
+    audience?: string
+    whyNow?: string
+    category?: string
+    excitementLevel?: number
+    complexityLevel?: number
+    aiAnalysis?: { brief?: string; founderFitNote?: string }
+    marketResearch?: { summary?: string; competitors?: string[] }
+    decisionMatrix?: {
+      niche?: string
+      competitorsOver100k?: string
+      topCompetitors?: { name: string; revenue: string }[]
+      simplicity?: number
+      noSocial?: boolean
+      kiff?: number
+      marketability?: number
+    }
+  },
+  founderContext: string
+): string {
+  const snapshot = [
+    `Titre: ${idea.title}`,
+    idea.subtitle ? `Sous-titre: ${idea.subtitle}` : '',
+    idea.oneLiner ? `Résumé: ${idea.oneLiner}` : '',
+    idea.description ? `Description: ${idea.description}` : '',
+    idea.audience ? `Audience: ${idea.audience}` : '',
+    idea.whyNow ? `Pourquoi maintenant: ${idea.whyNow}` : '',
+    idea.category ? `Catégorie fiche: ${idea.category}` : '',
+    idea.excitementLevel != null ? `Excitement (1-10): ${idea.excitementLevel}` : '',
+    idea.complexityLevel != null ? `Complexité (1-10, pénalité): ${idea.complexityLevel}` : '',
+    idea.aiAnalysis?.brief ? `Brief Steven: ${idea.aiAnalysis.brief}` : '',
+    idea.aiAnalysis?.founderFitNote ? `Fit fondateur: ${idea.aiAnalysis.founderFitNote}` : '',
+    idea.marketResearch?.summary ? `Recherche marché: ${idea.marketResearch.summary}` : '',
+    idea.marketResearch?.competitors?.length
+      ? `Concurrents déjà listés: ${idea.marketResearch.competitors.join(' · ')}`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n')
+
+  const existing = idea.decisionMatrix
+    ? [
+        `Niche actuelle: ${idea.decisionMatrix.niche ?? '—'}`,
+        `2 concurrents +100k: ${idea.decisionMatrix.competitorsOver100k ?? 'unknown'}`,
+        idea.decisionMatrix.topCompetitors?.length
+          ? `Concurrents saisis: ${idea.decisionMatrix.topCompetitors
+              .map((c) => `${c.name} (${c.revenue})`)
+              .join(' · ')}`
+          : '',
+        `Simplicité: ${idea.decisionMatrix.simplicity ?? '—'}`,
+        `Pas social: ${idea.decisionMatrix.noSocial ?? '—'}`,
+        `Kiff: ${idea.decisionMatrix.kiff ?? '—'}`,
+        `Marketabilité: ${idea.decisionMatrix.marketability ?? '—'}`,
+      ]
+        .filter(Boolean)
+        .join('\n')
+    : '(aucune matrice encore)'
+
+  return `${JSON_ONLY_RULE}
+${ANTI_SLOP_PROSE_RULE}
+
+Remplis / challenge la matrice de décision evidence-first pour cette idée.
+Objectif : aider le fondateur à prendre du recul, pas à valider l'idée par défaut.
+
+JSON:
+{
+  "niche": "catégorie / niche courte",
+  "competitorsOver100k": "yes"|"no"|"unknown",
+  "topCompetitors": [
+    { "name": string, "revenue": string, "revenueConfidence"?: "low"|"medium"|"high", "sourceNote"?: string }
+  ],
+  "simplicity": 1-5,
+  "noSocial": boolean,
+  "kiff": 1-5,
+  "marketability": 1-5,
+  "stevenChallenge": "2-5 phrases : ce qui cloche, ce qui manque de preuve, question de recul",
+  "stevenNotes"?: "notes courtes optionnelles"
+}
+
+Règles:
+- competitorsOver100k = yes seulement s'il y a des signaux crédibles que ≥2 apps/produits proches monétisent fort (ordre de grandeur ~100k+/an ou équivalent). Sinon no ou unknown.
+- Ne jamais inventer des revenus App Store / Sensor Tower comme faits. Si tu n'as pas de source, revenue = "unknown", revenueConfidence = "low", et dis-le dans sourceNote.
+- topCompetitors : 0 à 3 max. Préférer moins d'entrées honnêtes que 3 noms fantômes.
+- simplicity : 5 = très simple à livrer / peu de pièces mobiles ; 1 = infra lourde, cold-start social, multi-côté, etc.
+- noSocial = true si le produit n'exige PAS un réseau d'utilisateurs pour créer de la valeur (évite cold-start social).
+- kiff : alignement énergie / envie du fondateur (1-5), pas flatterie.
+- marketability : facilité à expliquer / vendre la promesse (1-5).
+- stevenChallenge : critique utile, concrete, sans motivational fluff.
+
+${founderContext}
+
+FICHE IDÉE:
+${snapshot}
+
+MATRICE ACTUELLE (à challenger / corriger):
+${existing}`
+}
